@@ -5,10 +5,10 @@
  * @package user-profile-picture
  */
 
-namespace PTAM\Includes\Admin\Tabs;
+namespace MediaRon\PTAM\Admin\Tabs;
 
-use PTAM\Includes\Functions as Functions;
-use PTAM\Includes\Admin\Options as Options;
+use MediaRon\PTAM\Helpers;
+use MediaRon\PTAM\Admin\Options;
 
 /**
  * Output the settings tab and content.
@@ -28,7 +28,7 @@ class Settings extends Tabs {
 	public function __construct() {
 		add_filter( 'ptam_admin_tabs', array( $this, 'add_tab' ), 1, 1 );
 		add_filter( 'ptam_admin_sub_tabs', array( $this, 'add_sub_tab' ), 1, 3 );
-		add_action( 'ptam_output_' . $this->tab, array( $this, 'output_settings' ), 1, 3 );
+		add_action( 'ptam_output_' . $this->tab, array( $this, 'output_settings' ), 1, 2 );
 	}
 
 	/**
@@ -42,7 +42,7 @@ class Settings extends Tabs {
 		$tabs[] = array(
 			'get'    => $this->tab,
 			'action' => 'ptam_output_' . $this->tab,
-			'url'    => Functions::get_settings_url( $this->tab ),
+			'url'    => Helpers::get_settings_url( $this->tab ),
 			'label'  => _x( 'Settings', 'Tab label as settings', 'post-type-archive-mapping' ),
 			'icon'   => 'home-heart',
 		);
@@ -83,7 +83,7 @@ class Settings extends Tabs {
 				// Get options and defaults.
 				$options = Options::get_options( true );
 				?>
-				<form action="<?php echo esc_url( Functions::get_settings_url( $this->tab ) ); ?>" method="POST">
+				<form action="<?php echo esc_url( Helpers::get_settings_url( $this->tab ) ); ?>" method="POST">
 					<?php wp_nonce_field( 'save_ptam_' . $this->tab ); ?>
 					<table class="form-table">
 						<tbody>

@@ -5,7 +5,7 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Admin;
+namespace MediaRon\PTAM\Admin;
 
 /**
  * Class Options
@@ -60,7 +60,7 @@ class Options {
 	 *
 	 * @param array $options array of options.
 	 *
-	 * @return array Options.
+	 * @return array|\WP_Error Options.
 	 */
 	public static function update_options( $options = array() ) {
 
@@ -69,18 +69,17 @@ class Options {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param array options.
-		 *
-		 * @return mixed WP_Error|array Array of options, or WP_Error on failure to save.
+		 * @param array $options Array of options.
 		 */
-		$options = apply_filters( 'ptam_options_save_pre', $options );
-		if ( self::sanitize_options( $options ) ) {
-			update_option( 'ptam_options', $options );
+		$filtered_options = apply_filters( 'ptam_options_save_pre', $options );
+		if ( self::sanitize_options( $filtered_options ) ) {
+			update_option( 'ptam_options', $filtered_options );
 
-			self::$options = $options;
+			self::$options = $filtered_options;
 
-			return $options;
+			return $filtered_options;
 		}
+
 		return new \WP_Error(
 			'ptam_update_options_fail',
 			__( 'Invalid options were not able to be sanitized' )

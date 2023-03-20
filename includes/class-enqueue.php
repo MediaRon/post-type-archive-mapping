@@ -5,10 +5,9 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes;
+namespace MediaRon\PTAM;
 
-use PTAM\Includes\Functions as Functions;
-use PTAM\Includes\Admin\Options as Options;
+use MediaRon\PTAM\Admin\Options;
 
 /**
  * Class enqueue
@@ -41,7 +40,7 @@ class Enqueue {
 		}
 		wp_enqueue_style(
 			'ptam-reading-admin',
-			\PostTypeArchiveMapping::get_plugin_url( 'dist/admin.css' ),
+			Plugin::get_plugin_url( 'dist/admin.css' ),
 			PTAM_VERSION,
 			'all'
 		);
@@ -53,7 +52,7 @@ class Enqueue {
 	public function enqueue_block_assets() {
 		wp_enqueue_style(
 			'ptam-style-css-editor',
-			\PostTypeArchiveMapping::get_plugin_url( 'dist/blockstyles.css' ),
+			Plugin::get_plugin_url( 'dist/blockstyles.css' ),
 			PTAM_VERSION,
 			'all'
 		);
@@ -65,13 +64,13 @@ class Enqueue {
 	public function enqueue_block_editor_assets() {
 		wp_register_style(
 			'ptam-style-editor-css',
-			\PostTypeArchiveMapping::get_plugin_url( 'dist/blockstyles.css' ),
+			Plugin::get_plugin_url( 'dist/blockstyles.css' ),
 			PTAM_VERSION,
 			'all'
 		);
 		wp_register_script(
 			'ptam-custom-posts-gutenberg',
-			\PostTypeArchiveMapping::get_plugin_url( 'build/index.js' ),
+			Plugin::get_plugin_url( 'build/index.js' ),
 			array( 'wp-blocks', 'wp-element' ),
 			PTAM_VERSION,
 			true
@@ -119,16 +118,16 @@ class Enqueue {
 			'ptam-custom-posts-gutenberg',
 			'ptam_globals',
 			array(
-				'img_url'                      => esc_url( \PostTypeArchiveMapping::get_plugin_url( 'img/loading.png' ) ),
+				'img_url'                      => esc_url( Plugin::get_plugin_url( 'img/loading.png' ) ),
 				'rest_url'                     => esc_url( rest_url() ),
 				'taxonomies'                   => $tax_array,
-				'fonts'                        => Functions::get_fonts(),
-				'image_sizes'                  => Functions::get_all_image_sizes(),
+				'fonts'                        => Helpers::get_fonts(),
+				'image_sizes'                  => Helpers::get_all_image_sizes(),
 				'post_types'                   => $post_type_array,
-				'custom_posts_block_preview'   => esc_url( \PostTypeArchiveMapping::get_plugin_url( 'img/custom-post-types-block.jpg' ) ),
-				'term_grid_block_preview'      => esc_url( \PostTypeArchiveMapping::get_plugin_url( 'img/term-grid-block.jpg' ) ),
-				'featured_posts_block_preview' => esc_url( \PostTypeArchiveMapping::get_plugin_url( 'img/featured-posts-block.jpg' ) ),
-				'wpml_installed'               => defined( 'ICL_SITEPRESS_VERSION' ) ? true : false,
+				'custom_posts_block_preview'   => esc_url( Plugin::get_plugin_url( 'img/custom-post-types-block.jpg' ) ),
+				'term_grid_block_preview'      => esc_url( Plugin::get_plugin_url( 'img/term-grid-block.jpg' ) ),
+				'featured_posts_block_preview' => esc_url( Plugin::get_plugin_url( 'img/featured-posts-block.jpg' ) ),
+				'wpml_installed'               => defined( 'ICL_SITEPRESS_VERSION' ),
 				'wpml_languages'               => $wpml_languages,
 			)
 		);

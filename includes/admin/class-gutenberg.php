@@ -5,7 +5,7 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Admin;
+namespace MediaRon\PTAM\Admin;
 
 /**
  * Gutenberg helper class.

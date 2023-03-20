@@ -5,7 +5,7 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Admin;
+namespace MediaRon\PTAM\Admin;
 
 /**
  * Page Columns class.
@@ -33,7 +33,7 @@ class Page_Columns {
 		 *
 		 * @since 3.3.5
 		 *
-		 * @param bool true default.
+		 * @param bool $disable true default.
 		 */
 		if ( ! apply_filters( 'ptam_add_pages_column', true ) ) {
 			return $columns;

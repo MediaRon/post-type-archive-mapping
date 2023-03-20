@@ -1,54 +1,52 @@
 <?php
 /**
- * Plugin Autoloader
- *
- * @package PTAM
+ * Autoloader for WordPress.
  */
 
-/**
- * Register Autoloader
- */
+namespace MediaRon\PTAM;
+
+use function spl_autoload_register;
+
 spl_autoload_register(
-	function ( $class ) {
-		// Assume we're using namespaces (because that's how the plugin is structured).
-		$namespace = explode( '\\', $class );
-		$root      = array_shift( $namespace );
+	/**
+	 * Closure for the autoloader.
+	 *
+	 * @param class-string $class_name The fully-qualified class name.
+	 * @return void
+	 */
+	static function ( $class_name ) {
+		/**
+		 * __NAMESPACE__ could be an empty string.
+		 *
+		 * @phpstan-ignore-next-line
+		 */
+		$project_namespace = '' === __NAMESPACE__ ? '' : __NAMESPACE__ . '\\';
+		$length            = strlen( $project_namespace );
 
-		// If a class ends with "Trait" then prefix the filename with 'trait-', else use 'class-'.
-		$class_trait = preg_match( '/Trait$/', $class ) ? 'trait-' : 'class-';
-
-		// If we're not in the plugin's namespace then just return.
-		if ( 'PTAM' !== $root ) {
+		// Class is not in our namespace.
+		if ( 0 !== strncmp( $project_namespace, $class_name, $length ) ) {
 			return;
 		}
 
-		// Class name is the last part of the FQN.
-		$class_name = array_pop( $namespace );
+		// E.g. Model\Item.
+		$relative_class_name = substr( $class_name, $length );
+		// Class file names should be based on the class name with "class-" prepended
+		// and the underscores in the class name replaced with hyphens.
+		// E.g. model/class-item.php.
+		$name_parts = explode( '\\', strtolower( str_replace( '_', '-', $relative_class_name ) ) );
+		$last_part  = array_pop( $name_parts );
 
-		// Remove "Trait" from the class name.
-		if ( 'trait-' === $class_trait ) {
-			$class_name = str_replace( 'Trait', '', $class_name );
+		$file = sprintf(
+			'%1$s/includes%2$s/class-%3$s.php',
+			__DIR__,
+			array() === $name_parts ? '' : '/' . implode( '/', $name_parts ),
+			$last_part
+		);
+
+		if ( ! is_file( $file ) ) {
+			return;
 		}
 
-		$filename = $class_trait . $class_name . '.php';
-
-		// For file naming, the namespace is everything but the class name and the root namespace.
-		$namespace = trim( implode( DIRECTORY_SEPARATOR, $namespace ) );
-
-		// Because WordPress file naming conventions are odd.
-		$filename  = strtolower( str_replace( '_', '-', $filename ) );
-		$namespace = strtolower( str_replace( '_', '-', $namespace ) );
-
-		// Get the path to our files.
-		$directory = dirname( __FILE__ );
-		if ( ! empty( $namespace ) ) {
-			$directory .= DIRECTORY_SEPARATOR . $namespace;
-		}
-
-		$file = $directory . DIRECTORY_SEPARATOR . $filename;
-
-		if ( file_exists( $file ) ) {
-			require_once $file;
-		}
+		require $file;
 	}
 );

@@ -5,10 +5,9 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Admin;
+namespace MediaRon\PTAM\Admin;
 
-use PTAM\Includes\Functions as Functions;
-use PTAM\Includes\Admin\Options as Options;
+use MediaRon\PTAM\Helpers;
 
 /**
  * Class Admin Settings.
@@ -21,10 +20,10 @@ class Admin_Settings {
 	public function __construct() {
 		// For the admin interface.
 		add_action( 'admin_menu', array( $this, 'register_settings_menu' ) );
-		add_action( 'plugin_action_links_' . Functions::get_plugin_path(), array( $this, 'plugin_settings_link' ) );
+		add_filter( 'plugin_action_links_' . Helpers::get_plugin_path(), array( $this, 'plugin_settings_link' ) );
 
-		new \PTAM\Includes\Admin\Tabs\Settings();
-		new \PTAM\Includes\Admin\Tabs\Support();
+		new \MediaRon\PTAM\Admin\Tabs\Settings();
+		new \MediaRon\PTAM\Admin\Tabs\Support();
 	}
 
 	/**
@@ -41,12 +40,12 @@ class Admin_Settings {
 
 		$admin_settings_links[] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( Functions::get_settings_url( 'settings' ) ),
+			esc_url( Helpers::get_settings_url( 'settings' ) ),
 			esc_html__( 'Settings', 'post-type-archive-mapping' )
 		);
 		$admin_settings_links[] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( Functions::get_settings_url( 'support' ) ),
+			esc_url( Helpers::get_settings_url( 'support' ) ),
 			esc_html__( 'Support', 'post-type-archive-mapping' )
 		);
 		$admin_settings_links[] = sprintf(
@@ -82,7 +81,7 @@ class Admin_Settings {
 	 * Output the top-level admin tabs.
 	 */
 	public static function get_settings_tabs() {
-		$settings_url_base = Functions::get_settings_url( 'settings' )
+		$settings_url_base = Helpers::get_settings_url( 'settings' )
 		?>
 			<?php
 			$tabs = array();
@@ -99,7 +98,7 @@ class Admin_Settings {
 			$tab_html   = '<nav class="nav-tab-wrapper">';
 			$tabs_count = count( $tabs );
 			if ( $tabs && ! empty( $tabs ) && is_array( $tabs ) ) {
-				$active_tab = Functions::get_admin_tab();
+				$active_tab = Helpers::get_admin_tab();
 				if ( null === $active_tab ) {
 					$active_tab = 'settings';
 				}
@@ -140,11 +139,11 @@ class Admin_Settings {
 				}
 				$tab_html .= '</nav>';
 				if ( $tabs_count > 0 ) {
-					echo wp_kses( $tab_html, Functions::get_kses_allowed_html() );
+					echo wp_kses( $tab_html, Helpers::get_kses_allowed_html() );
 				}
 
-				$current_tab     = Functions::get_admin_tab();
-				$current_sub_tab = Functions::get_admin_sub_tab();
+				$current_tab     = Helpers::get_admin_tab();
+				$current_sub_tab = Helpers::get_admin_sub_tab();
 
 				/**
 				 * Filer the output of the sub-tab output.
@@ -153,9 +152,9 @@ class Admin_Settings {
 				 *
 				 * @since 5.1.0
 				 *
-				 * @param array Associative array of tabs.
-				 * @param string Tab
-				 * @param string Sub Tab
+				 * @param array $tabs Associative array of tabs.
+				 * @param string $tab Tab
+				 * @param string $sub_tab Sub Tab
 				 */
 				$sub_tabs = apply_filters( 'ptam_admin_sub_tabs', array(), $current_tab, $current_sub_tab );
 
@@ -219,7 +218,6 @@ class Admin_Settings {
 						 * @since 5.1.0
 						 *
 						 * mpp_admin_sub_tab_{current_tab}_{current_sub_tab}
-						 * @param string Sub Tab
 						 */
 						do_action(
 							sprintf( // phpcs:ignore
@@ -239,9 +237,8 @@ class Admin_Settings {
 					 *
 					 * @since 5.1.0
 					 *
-					 * @param string $action Can be any action.
-					 * @param string Tab
-					 * @param string Sub Tab
+					 * @param string $current_tab Tab
+					 * @param string $current_sub_tab Sub Tab
 					 */
 					do_action( $do_action, $current_tab, $current_sub_tab );
 				}
@@ -257,7 +254,7 @@ class Admin_Settings {
 		?>
 		<div class="wrap ptam-admin-wrap">
 			<h1>
-				<a href="<?php echo esc_url( Functions::get_settings_url() ); ?>" class="ptam-admin-logo"><img src="<?php echo esc_url( Functions::get_plugin_logo() ); ?>" alt="Custom Query Blocks" /></a>
+				<a href="<?php echo esc_url( Helpers::get_settings_url() ); ?>" class="ptam-admin-logo"><img src="<?php echo esc_url( Helpers::get_plugin_logo() ); ?>" alt="Custom Query Blocks" /></a>
 				<strong style="font-weight: 500;"><?php echo esc_html( _x( 'Custom Query Blocks', 'Custom Query Blocks', 'post-type-archive-mapping' ) ); ?></strong>
 			</h1>
 			<p class="ptam-info-text"><?php esc_html_e( 'This plugin provides several helper Query Blocks as well as archive mapping for post type archives, terms, and a 404 page.', 'post-type-archive-mapping' ); ?></p>
@@ -284,7 +281,7 @@ class Admin_Settings {
 			__( 'Custom Query Blocks', 'post-type-archive-mapping' ),
 			'manage_options',
 			'custom-query-blocks',
-			array( '\PTAM\Includes\Admin\Admin_Settings', 'settings_page' )
+			array( '\MediaRon\PTAM\Admin\Admin_Settings', 'settings_page' )
 		);
 		return $hook;
 	}

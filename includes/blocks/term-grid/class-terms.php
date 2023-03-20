@@ -5,9 +5,9 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Blocks\Term_Grid;
+namespace MediaRon\PTAM\Blocks\Term_Grid;
 
-use PTAM\Includes\Functions as Functions;
+use MediaRon\PTAM\Helpers;
 
 /**
  * Custom Post Types Block helper methods.
@@ -153,7 +153,7 @@ class Terms {
 		 *
 		 * @param array  $query      The term query.
 		 * @param array  $attributes The passed attributes.
-		 * @parma string $taxonomy   The taxonomy.
+		 * @param string $taxonomy   The taxonomy.
 		 */
 		$query = apply_filters( 'ptam_term_grid_query', $query, $attributes, $taxonomy );
 
@@ -163,66 +163,66 @@ class Terms {
 			return ob_get_clean();
 		}
 
-		$attributes['align']                 = Functions::sanitize_attribute( $attributes, 'align', 'text' );
-		$attributes['columns']               = Functions::sanitize_attribute( $attributes, 'columns', 'int' );
-		$attributes['showTermTitle']         = Functions::sanitize_attribute( $attributes, 'showTermTitle', 'bool' );
-		$attributes['showTermDescription']   = Functions::sanitize_attribute( $attributes, 'showTermDescription', 'bool' );
-		$attributes['disableStyles']         = Functions::sanitize_attribute( $attributes, 'disableStyles', 'bool' );
-		$attributes['linkContainer']         = Functions::sanitize_attribute( $attributes, 'linkContainer', 'bool' );
-		$attributes['linkTermTitle']         = Functions::sanitize_attribute( $attributes, 'linkTermTitle', 'bool' );
-		$attributes['showButton']            = Functions::sanitize_attribute( $attributes, 'showButton', 'bool' );
-		$attributes['backgroundImageSource'] = Functions::sanitize_attribute( $attributes, 'backgroundImageSource', 'text' );
-		$attributes['backgroundImageMeta']   = Functions::sanitize_attribute( $attributes, 'backgroundImageMeta', 'text' );
+		$attributes['align']                 = Helpers::sanitize_attribute( $attributes, 'align', 'text' );
+		$attributes['columns']               = Helpers::sanitize_attribute( $attributes, 'columns', 'int' );
+		$attributes['showTermTitle']         = Helpers::sanitize_attribute( $attributes, 'showTermTitle', 'bool' );
+		$attributes['showTermDescription']   = Helpers::sanitize_attribute( $attributes, 'showTermDescription', 'bool' );
+		$attributes['disableStyles']         = Helpers::sanitize_attribute( $attributes, 'disableStyles', 'bool' );
+		$attributes['linkContainer']         = Helpers::sanitize_attribute( $attributes, 'linkContainer', 'bool' );
+		$attributes['linkTermTitle']         = Helpers::sanitize_attribute( $attributes, 'linkTermTitle', 'bool' );
+		$attributes['showButton']            = Helpers::sanitize_attribute( $attributes, 'showButton', 'bool' );
+		$attributes['backgroundImageSource'] = Helpers::sanitize_attribute( $attributes, 'backgroundImageSource', 'text' );
+		$attributes['backgroundImageMeta']   = Helpers::sanitize_attribute( $attributes, 'backgroundImageMeta', 'text' );
 		if ( is_array( $attributes['backgroundImageFallback'] ) ) {
 			if ( isset( $attributes['backgroundImageFallback']['id'] ) ) {
 				$attributes['backgroundImageFallback'] = $attributes['backgroundImageFallback']['id'];
-				$attributes['backgroundImageFallback'] = Functions::sanitize_attribute( $attributes, 'backgroundImageFallback', 'int' );
+				$attributes['backgroundImageFallback'] = Helpers::sanitize_attribute( $attributes, 'backgroundImageFallback', 'int' );
 			} else {
 				$attributes['backgroundImageFallback'] = 0;
 			}
 		} else {
 			$attributes['backgroundImageFallback'] = 0;
 		}
-		$attributes['backgroundColor']                = Functions::sanitize_attribute( $attributes, 'backgroundColor', 'text' );
-		$attributes['backgroundColorHover']           = Functions::sanitize_attribute( $attributes, 'backgroundColorHover', 'text' );
-		$attributes['backgroundGradient']             = Functions::sanitize_attribute( $attributes, 'backgroundGradient', 'text' );
-		$attributes['backgroundGradientHover']        = Functions::sanitize_attribute( $attributes, 'backgroundGradientHover', 'text' );
-		$attributes['overlayColor']                   = Functions::sanitize_attribute( $attributes, 'overlayColor', 'text' );
-		$attributes['overlayColorHover']              = Functions::sanitize_attribute( $attributes, 'overlayColorHover', 'text' );
-		$attributes['overlayOpacity']                 = Functions::sanitize_attribute( $attributes, 'overlayOpacity', 'float' );
-		$attributes['overlayOpacityHover']            = Functions::sanitize_attribute( $attributes, 'overlayOpacityHover', 'float' );
-		$attributes['termTitleColor']                 = Functions::sanitize_attribute( $attributes, 'termTitleColor', 'text' );
-		$attributes['termTitleColorHover']            = Functions::sanitize_attribute( $attributes, 'termTitleColorHover', 'text' );
-		$attributes['termDescriptionColor']           = Functions::sanitize_attribute( $attributes, 'termDescriptionColor', 'text' );
-		$attributes['termDescriptionColorHover']      = Functions::sanitize_attribute( $attributes, 'termDescriptionColorHover', 'text' );
-		$attributes['itemBorder']                     = Functions::sanitize_attribute( $attributes, 'itemBorder', 'int' );
-		$attributes['itemBorderColor']                = Functions::sanitize_attribute( $attributes, 'itemBorderColor', 'text' );
-		$attributes['termTitleFont']                  = Functions::sanitize_attribute( $attributes, 'termTitleFont', 'text' );
-		$attributes['termDescriptionFont']            = Functions::sanitize_attribute( $attributes, 'termDescriptionFont', 'text' );
-		$attributes['termButtonText']                 = Functions::sanitize_attribute( $attributes, 'termButtonText', 'text' );
-		$attributes['termButtonFont']                 = Functions::sanitize_attribute( $attributes, 'termButtonFont', 'text' );
-		$attributes['termButtonTextColor']            = Functions::sanitize_attribute( $attributes, 'termButtonTextColor', 'text' );
-		$attributes['termButtonTextHoverColor']       = Functions::sanitize_attribute( $attributes, 'termButtonTextHoverColor', 'text' );
-		$attributes['termButtonBackgroundColor']      = Functions::sanitize_attribute( $attributes, 'termButtonBackgroundColor', 'text' );
-		$attributes['termButtonBorder']               = Functions::sanitize_attribute( $attributes, 'termButtonBorder', 'int' );
-		$attributes['termButtonBorderColor']          = Functions::sanitize_attribute( $attributes, 'termButtonBorderColor', 'text' );
-		$attributes['termButtonBorderRadius']         = Functions::sanitize_attribute( $attributes, 'termButtonBorderRadius', 'int' );
-		$attributes['columns']                        = Functions::sanitize_attribute( $attributes, 'columns', 'int' );
-		$attributes['showTermTitle']                  = Functions::sanitize_attribute( $attributes, 'showTermTitle', 'bool' );
-		$attributes['disableStyles']                  = Functions::sanitize_attribute( $attributes, 'disableStyles', 'bool' );
-		$attributes['linkTermTitle']                  = Functions::sanitize_attribute( $attributes, 'linkTermTitle', 'bool' );
-		$attributes['imageSize']                      = Functions::sanitize_attribute( $attributes, 'imageSize', 'text' );
-		$attributes['containerId']                    = Functions::sanitize_attribute( $attributes, 'containerId', 'text' );
-		$attributes['backgroundType']                 = Functions::sanitize_attribute( $attributes, 'backgroundType', 'text' );
-		$attributes['itemBorderRadius']               = Functions::sanitize_attribute( $attributes, 'itemBorderRadius', 'int' );
-		$attributes['termButtonBackgroundHoverColor'] = Functions::sanitize_attribute( $attributes, 'termButtonBackgroundHoverColor', 'text' );
+		$attributes['backgroundColor']                = Helpers::sanitize_attribute( $attributes, 'backgroundColor', 'text' );
+		$attributes['backgroundColorHover']           = Helpers::sanitize_attribute( $attributes, 'backgroundColorHover', 'text' );
+		$attributes['backgroundGradient']             = Helpers::sanitize_attribute( $attributes, 'backgroundGradient', 'text' );
+		$attributes['backgroundGradientHover']        = Helpers::sanitize_attribute( $attributes, 'backgroundGradientHover', 'text' );
+		$attributes['overlayColor']                   = Helpers::sanitize_attribute( $attributes, 'overlayColor', 'text' );
+		$attributes['overlayColorHover']              = Helpers::sanitize_attribute( $attributes, 'overlayColorHover', 'text' );
+		$attributes['overlayOpacity']                 = Helpers::sanitize_attribute( $attributes, 'overlayOpacity', 'float' );
+		$attributes['overlayOpacityHover']            = Helpers::sanitize_attribute( $attributes, 'overlayOpacityHover', 'float' );
+		$attributes['termTitleColor']                 = Helpers::sanitize_attribute( $attributes, 'termTitleColor', 'text' );
+		$attributes['termTitleColorHover']            = Helpers::sanitize_attribute( $attributes, 'termTitleColorHover', 'text' );
+		$attributes['termDescriptionColor']           = Helpers::sanitize_attribute( $attributes, 'termDescriptionColor', 'text' );
+		$attributes['termDescriptionColorHover']      = Helpers::sanitize_attribute( $attributes, 'termDescriptionColorHover', 'text' );
+		$attributes['itemBorder']                     = Helpers::sanitize_attribute( $attributes, 'itemBorder', 'int' );
+		$attributes['itemBorderColor']                = Helpers::sanitize_attribute( $attributes, 'itemBorderColor', 'text' );
+		$attributes['termTitleFont']                  = Helpers::sanitize_attribute( $attributes, 'termTitleFont', 'text' );
+		$attributes['termDescriptionFont']            = Helpers::sanitize_attribute( $attributes, 'termDescriptionFont', 'text' );
+		$attributes['termButtonText']                 = Helpers::sanitize_attribute( $attributes, 'termButtonText', 'text' );
+		$attributes['termButtonFont']                 = Helpers::sanitize_attribute( $attributes, 'termButtonFont', 'text' );
+		$attributes['termButtonTextColor']            = Helpers::sanitize_attribute( $attributes, 'termButtonTextColor', 'text' );
+		$attributes['termButtonTextHoverColor']       = Helpers::sanitize_attribute( $attributes, 'termButtonTextHoverColor', 'text' );
+		$attributes['termButtonBackgroundColor']      = Helpers::sanitize_attribute( $attributes, 'termButtonBackgroundColor', 'text' );
+		$attributes['termButtonBorder']               = Helpers::sanitize_attribute( $attributes, 'termButtonBorder', 'int' );
+		$attributes['termButtonBorderColor']          = Helpers::sanitize_attribute( $attributes, 'termButtonBorderColor', 'text' );
+		$attributes['termButtonBorderRadius']         = Helpers::sanitize_attribute( $attributes, 'termButtonBorderRadius', 'int' );
+		$attributes['columns']                        = Helpers::sanitize_attribute( $attributes, 'columns', 'int' );
+		$attributes['showTermTitle']                  = Helpers::sanitize_attribute( $attributes, 'showTermTitle', 'bool' );
+		$attributes['disableStyles']                  = Helpers::sanitize_attribute( $attributes, 'disableStyles', 'bool' );
+		$attributes['linkTermTitle']                  = Helpers::sanitize_attribute( $attributes, 'linkTermTitle', 'bool' );
+		$attributes['imageSize']                      = Helpers::sanitize_attribute( $attributes, 'imageSize', 'text' );
+		$attributes['containerId']                    = Helpers::sanitize_attribute( $attributes, 'containerId', 'text' );
+		$attributes['backgroundType']                 = Helpers::sanitize_attribute( $attributes, 'backgroundType', 'text' );
+		$attributes['itemBorderRadius']               = Helpers::sanitize_attribute( $attributes, 'itemBorderRadius', 'int' );
+		$attributes['termButtonBackgroundHoverColor'] = Helpers::sanitize_attribute( $attributes, 'termButtonBackgroundHoverColor', 'text' );
 		if ( ! $attributes['disableStyles'] ) :
 			?>
 		<style>
 			<?php
 			if ( 'image' === $attributes['backgroundType'] ) {
-				$overlay_color       = Functions::hex2rgba( $attributes['overlayColor'], $attributes['overlayOpacity'] );
-				$overlay_color_hover = Functions::hex2rgba( $attributes['overlayColorHover'], $attributes['overlayOpacityHover'] );
+				$overlay_color       = Helpers::hex2rgba( $attributes['overlayColor'], $attributes['overlayOpacity'] );
+				$overlay_color_hover = Helpers::hex2rgba( $attributes['overlayColorHover'], $attributes['overlayOpacityHover'] );
 				?>
 				#<?php echo esc_html( $attributes['containerId'] ); ?> .ptam-term-grid-item:before {
 					content: '';
@@ -339,9 +339,9 @@ class Terms {
 				<div class="ptam-term-grid-item"
 					<?php
 					if ( ! $attributes['disableStyles'] && 'image' === $attributes['backgroundType'] ) {
-						$background_image = Functions::get_term_image( $attributes['imageSize'], $attributes['backgroundImageMeta'], $attributes['backgroundImageSource'], $taxonomy, $term->term_id );
+						$background_image = Helpers::get_term_image( $attributes['imageSize'], $attributes['backgroundImageMeta'], $attributes['backgroundImageSource'], $taxonomy, $term->term_id );
 						if ( empty( $background_image ) ) {
-							$background_image = Functions::get_image( $attributes['backgroundImageFallback'], $attributes['imageSize'] );
+							$background_image = Helpers::get_image( $attributes['backgroundImageFallback'], $attributes['imageSize'] );
 						}
 						echo 'style="background-image: url(' . esc_url( $background_image ) . ')"';
 					}
@@ -416,7 +416,7 @@ class Terms {
 		}
 
 		register_block_type(
-			Functions::get_plugin_dir( 'build/block/term-grid/block.json' ),
+			Helpers::get_plugin_dir( 'build/block/term-grid/block.json' ),
 			array( 'render_callback' => array( $this, 'term_grid' ) ),
 		);
 	}

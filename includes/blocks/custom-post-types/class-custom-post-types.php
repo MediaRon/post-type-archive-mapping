@@ -5,11 +5,10 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Blocks\Custom_Post_Types;
+namespace MediaRon\PTAM\Blocks\Custom_Post_Types;
 
-use PTAM\Includes\Admin\Options as Options;
-
-use PTAM\Includes\Functions as Functions;
+use MediaRon\PTAM\Admin\Options;
+use MediaRon\PTAM\Helpers;
 
 /**
  * Custom Post Types Block helper methods.
@@ -33,7 +32,7 @@ class Custom_Post_Types {
 		 *
 		 * @since 3.3.5
 		 *
-		 * @param bool true (default)
+		 * @param bool $add true (default)
 		 */
 		if ( ! apply_filters( 'ptam_add_image_sizes', true ) ) {
 			return;
@@ -355,7 +354,6 @@ class Custom_Post_Types {
 										 *
 										 * @param mixed  $custom_field_value The custom field value.
 										 * @param string $maybe_custom_field The custom field name.
-										 * @param int    $post_id            The Post ID.
 										 */
 										$custom_field_value   = apply_filters( 'ptam_custom_field', $custom_field_value, $maybe_custom_field );
 										$custom_fields_markup = str_replace( $custom_field_match, $custom_field_value, $custom_fields_markup );
@@ -643,7 +641,7 @@ class Custom_Post_Types {
 		}
 
 		register_block_type(
-			Functions::get_plugin_dir( 'build/block/custom-post-one/block.json' ),
+			Helpers::get_plugin_dir( 'build/block/custom-post-one/block.json' ),
 			array( 'render_callback' => array( $this, 'custom_posts' ) ),
 		);
 	}

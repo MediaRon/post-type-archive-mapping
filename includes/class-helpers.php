@@ -5,12 +5,12 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes;
+namespace MediaRon\PTAM;
 
 /**
  * Class functions
  */
-class Functions {
+class Helpers {
 	/**
 	 * Get all the registered image sizes along with their dimensions
 	 *
@@ -201,7 +201,7 @@ class Functions {
 	/**
 	 * Get web safe fonts
 	 *
-	 * @return array $fonts Fonts to Use
+	 * @return array<string,string> $fonts Fonts to Use
 	 */
 	public static function get_fonts() {
 		/**
@@ -209,7 +209,7 @@ class Functions {
 		 *
 		 * @since 3.5.0
 		 *
-		 * @param array  associative array of key/value pairs of fonts.
+		 * @param array<string,string> $fonts Associative array of key/value pairs of fonts.
 		 */
 		$fonts     = apply_filters(
 			'ptam_fonts',
@@ -241,8 +241,8 @@ class Functions {
 				}
 			}
 		}
-		$fonts = array_merge( $fonts, $pro_fonts );
-		return $fonts;
+
+		return array_merge( $fonts, $pro_fonts );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string URL to the plugin logo.
+		 * @param string $url URL to the plugin logo.
 		 */
 		return apply_filters( 'ptam_plugin_logo_full', self::get_plugin_url( '/img/logo.png' ) );
 	}
@@ -356,7 +356,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string Plugin Author name.
+		 * @param string $name Plugin Author name.
 		 */
 		$plugin_author = apply_filters( 'ptam_plugin_author', 'MediaRon LLC' );
 		return $plugin_author;
@@ -373,7 +373,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string Plugin Author URI.
+		 * @param string $uri Plugin Author URI.
 		 */
 		$plugin_author = apply_filters( 'ptam_plugin_author_uri', 'https://mediaron.com' );
 		return $plugin_author;
@@ -390,7 +390,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string URL to the plugin icon.
+		 * @param string $icon URL to the plugin icon.
 		 */
 		return apply_filters( 'ptam_plugin_icon', self::get_plugin_url( '/img/logo.png' ) );
 	}
@@ -408,7 +408,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string Plugin name.
+		 * @param string $name Plugin name.
 		 */
 		return apply_filters( 'ptam_plugin_name', __( 'Custom Query Blocks', 'post-type-archive-mapping' ) );
 	}
@@ -426,7 +426,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string Plugin description.
+		 * @param string $description Plugin description.
 		 */
 		return apply_filters( 'ptam_plugin_description', __( 'Map your post type and term archives to a page and use our Gutenberg blocks to show posts or terms.', 'post-type-archive-mapping' ) );
 	}
@@ -442,7 +442,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string Plugin URI.
+		 * @param string $uri Plugin URI.
 		 */
 		return apply_filters( 'ptam_plugin_uri', 'https://mediaron.com/custom-query-blocks/' );
 	}
@@ -458,7 +458,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string Plugin Menu Name.
+		 * @param string $name Plugin Menu Name.
 		 */
 		return apply_filters( 'ptam_plugin_menu_name', __( 'Custom Query Blocks', 'post-type-archive-mapping' ) );
 	}
@@ -474,7 +474,7 @@ class Functions {
 		 *
 		 * @since 5.1.0
 		 *
-		 * @param string Plugin Menu Name.
+		 * @param string $name Plugin Menu Name.
 		 */
 		return apply_filters( 'ptam_plugin_menu_title', self::get_plugin_name() );
 	}

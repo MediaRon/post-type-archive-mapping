@@ -5,7 +5,7 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Admin\Tabs;
+namespace MediaRon\PTAM\Admin\Tabs;
 
 /**
  * Tabs boilerplate.

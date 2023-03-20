@@ -5,9 +5,9 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Blocks\Featured_Posts;
+namespace MediaRon\PTAM\Blocks\Featured_Posts;
 
-use PTAM\Includes\Functions as Functions;
+use MediaRon\PTAM\Helpers;
 
 /**
  * Featured Posts Block
@@ -76,60 +76,60 @@ class Posts {
 			);
 		}
 
-		$attributes['taxonomy']           = Functions::sanitize_attribute( $attributes, 'align', 'text' );
-		$attributes['postType']           = Functions::sanitize_attribute( $attributes, 'postType', 'text' );
-		$attributes['postLayout']         = Functions::sanitize_attribute( $attributes, 'postLayout', 'text' );
-		$attributes['displayPostContent'] = Functions::sanitize_attribute( $attributes, 'displayPostContent', 'bool' );
-		$attributes['term']               = Functions::sanitize_attribute( $attributes, 'term', 'int' );
-		$attributes['order']              = Functions::sanitize_attribute( $attributes, 'order', 'text' );
-		$attributes['orderBy']            = Functions::sanitize_attribute( $attributes, 'orderBy', 'text' );
-		$attributes['align']              = Functions::sanitize_attribute( $attributes, 'align', 'text' );
-		$attributes['imageTypeSize']      = Functions::sanitize_attribute( $attributes, 'imageTypeSize', 'text' );
-		$attributes['postsToShow']        = Functions::sanitize_attribute( $attributes, 'postsToShow', 'int' );
+		$attributes['taxonomy']           = Helpers::sanitize_attribute( $attributes, 'align', 'text' );
+		$attributes['postType']           = Helpers::sanitize_attribute( $attributes, 'postType', 'text' );
+		$attributes['postLayout']         = Helpers::sanitize_attribute( $attributes, 'postLayout', 'text' );
+		$attributes['displayPostContent'] = Helpers::sanitize_attribute( $attributes, 'displayPostContent', 'bool' );
+		$attributes['term']               = Helpers::sanitize_attribute( $attributes, 'term', 'int' );
+		$attributes['order']              = Helpers::sanitize_attribute( $attributes, 'order', 'text' );
+		$attributes['orderBy']            = Helpers::sanitize_attribute( $attributes, 'orderBy', 'text' );
+		$attributes['align']              = Helpers::sanitize_attribute( $attributes, 'align', 'text' );
+		$attributes['imageTypeSize']      = Helpers::sanitize_attribute( $attributes, 'imageTypeSize', 'text' );
+		$attributes['postsToShow']        = Helpers::sanitize_attribute( $attributes, 'postsToShow', 'int' );
 		if ( is_array( $attributes['fallbackImg'] ) ) {
 			if ( isset( $attributes['fallbackImg']['id'] ) ) {
 				$attributes['fallbackImg'] = $attributes['fallbackImg']['id'];
-				$attributes['fallbackImg'] = Functions::sanitize_attribute( $attributes, 'fallbackImg', 'int' );
+				$attributes['fallbackImg'] = Helpers::sanitize_attribute( $attributes, 'fallbackImg', 'int' );
 			} else {
 				$attributes['fallbackImg'] = 0;
 			}
 		} else {
 			$attributes['fallbackImg'] = 0;
 		}
-		$attributes['termDisplayPaddingLeft']             = Functions::sanitize_attribute( $attributes, 'termDisplayPaddingLeft', 'int' );
-		$attributes['termDisplayPaddingRight']            = Functions::sanitize_attribute( $attributes, 'termDisplayPaddingRight', 'int' );
-		$attributes['termDisplayPaddingBottom']           = Functions::sanitize_attribute( $attributes, 'termDisplayPaddingBottom', 'int' );
-		$attributes['termBackgroundColor']                = Functions::sanitize_attribute( $attributes, 'termBackgroundColor', 'text' );
-		$attributes['termTextColor']                      = Functions::sanitize_attribute( $attributes, 'termTextColor', 'text' );
-		$attributes['termFont']                           = Functions::sanitize_attribute( $attributes, 'termFont', 'text' );
-		$attributes['termTitle']                          = Functions::sanitize_attribute( $attributes, 'termTitle', 'text' );
-		$attributes['titleFont']                          = Functions::sanitize_attribute( $attributes, 'titleFont', 'text' );
-		$attributes['titleFontSize']                      = Functions::sanitize_attribute( $attributes, 'titleFontSize', 'int' );
-		$attributes['titleColor']                         = Functions::sanitize_attribute( $attributes, 'titleColor', 'text' );
-		$attributes['titleColorHover']                    = Functions::sanitize_attribute( $attributes, 'titleColorHover', 'text' );
-		$attributes['containerId']                        = Functions::sanitize_attribute( $attributes, 'containerId', 'text' );
-		$attributes['disableStyles']                      = Functions::sanitize_attribute( $attributes, 'disableStyles', 'bool' );
-		$attributes['showMeta']                           = Functions::sanitize_attribute( $attributes, 'showMeta', 'bool' );
-		$attributes['showMetaAuthor']                     = Functions::sanitize_attribute( $attributes, 'showMetaAuthor', 'bool' );
-		$attributes['showMetaDate']                       = Functions::sanitize_attribute( $attributes, 'showMetaDate', 'bool' );
-		$attributes['showMetaComments']                   = Functions::sanitize_attribute( $attributes, 'showMetaComments', 'bool' );
-		$attributes['showFeaturedImage']                  = Functions::sanitize_attribute( $attributes, 'showFeaturedImage', 'bool' );
-		$attributes['showReadMore']                       = Functions::sanitize_attribute( $attributes, 'showReadMore', 'bool' );
-		$attributes['showExcerpt']                        = Functions::sanitize_attribute( $attributes, 'showExcerpt', 'bool' );
-		$attributes['excerptFont']                        = Functions::sanitize_attribute( $attributes, 'excerptFont', 'text' );
-		$attributes['excerptLength']                      = Functions::sanitize_attribute( $attributes, 'excerptLength', 'int' );
-		$attributes['excerptFontSize']                    = Functions::sanitize_attribute( $attributes, 'excerptFontSize', 'int' );
-		$attributes['excerptTextColor']                   = Functions::sanitize_attribute( $attributes, 'excerptTextColor', 'text' );
-		$attributes['readMoreButtonText']                 = Functions::sanitize_attribute( $attributes, 'readMoreButtonText', 'text' );
-		$attributes['readMoreButtonFont']                 = Functions::sanitize_attribute( $attributes, 'readMoreButtonFont', 'text' );
-		$attributes['readMoreButtonTextColor']            = Functions::sanitize_attribute( $attributes, 'readMoreButtonTextColor', 'text' );
-		$attributes['readMoreButtonTextHoverColor']       = Functions::sanitize_attribute( $attributes, 'readMoreButtonTextHoverColor', 'text' );
-		$attributes['readMoreButtonBackgroundColor']      = Functions::sanitize_attribute( $attributes, 'readMoreButtonBackgroundColor', 'text' );
-		$attributes['readMoreButtonBackgroundHoverColor'] = Functions::sanitize_attribute( $attributes, 'readMoreButtonBackgroundHoverColor', 'text' );
-		$attributes['readMoreButtonBorder']               = Functions::sanitize_attribute( $attributes, 'readMoreButtonBorder', 'int' );
-		$attributes['readMoreButtonBorderColor']          = Functions::sanitize_attribute( $attributes, 'readMoreButtonBorderColor', 'text' );
-		$attributes['readMoreButtonBorderRadius']         = Functions::sanitize_attribute( $attributes, 'readMoreButtonBorderRadius', 'int' );
-		$attributes['showPagination']                     = Functions::sanitize_attribute( $attributes, 'showPagination', 'bool' );
+		$attributes['termDisplayPaddingLeft']             = Helpers::sanitize_attribute( $attributes, 'termDisplayPaddingLeft', 'int' );
+		$attributes['termDisplayPaddingRight']            = Helpers::sanitize_attribute( $attributes, 'termDisplayPaddingRight', 'int' );
+		$attributes['termDisplayPaddingBottom']           = Helpers::sanitize_attribute( $attributes, 'termDisplayPaddingBottom', 'int' );
+		$attributes['termBackgroundColor']                = Helpers::sanitize_attribute( $attributes, 'termBackgroundColor', 'text' );
+		$attributes['termTextColor']                      = Helpers::sanitize_attribute( $attributes, 'termTextColor', 'text' );
+		$attributes['termFont']                           = Helpers::sanitize_attribute( $attributes, 'termFont', 'text' );
+		$attributes['termTitle']                          = Helpers::sanitize_attribute( $attributes, 'termTitle', 'text' );
+		$attributes['titleFont']                          = Helpers::sanitize_attribute( $attributes, 'titleFont', 'text' );
+		$attributes['titleFontSize']                      = Helpers::sanitize_attribute( $attributes, 'titleFontSize', 'int' );
+		$attributes['titleColor']                         = Helpers::sanitize_attribute( $attributes, 'titleColor', 'text' );
+		$attributes['titleColorHover']                    = Helpers::sanitize_attribute( $attributes, 'titleColorHover', 'text' );
+		$attributes['containerId']                        = Helpers::sanitize_attribute( $attributes, 'containerId', 'text' );
+		$attributes['disableStyles']                      = Helpers::sanitize_attribute( $attributes, 'disableStyles', 'bool' );
+		$attributes['showMeta']                           = Helpers::sanitize_attribute( $attributes, 'showMeta', 'bool' );
+		$attributes['showMetaAuthor']                     = Helpers::sanitize_attribute( $attributes, 'showMetaAuthor', 'bool' );
+		$attributes['showMetaDate']                       = Helpers::sanitize_attribute( $attributes, 'showMetaDate', 'bool' );
+		$attributes['showMetaComments']                   = Helpers::sanitize_attribute( $attributes, 'showMetaComments', 'bool' );
+		$attributes['showFeaturedImage']                  = Helpers::sanitize_attribute( $attributes, 'showFeaturedImage', 'bool' );
+		$attributes['showReadMore']                       = Helpers::sanitize_attribute( $attributes, 'showReadMore', 'bool' );
+		$attributes['showExcerpt']                        = Helpers::sanitize_attribute( $attributes, 'showExcerpt', 'bool' );
+		$attributes['excerptFont']                        = Helpers::sanitize_attribute( $attributes, 'excerptFont', 'text' );
+		$attributes['excerptLength']                      = Helpers::sanitize_attribute( $attributes, 'excerptLength', 'int' );
+		$attributes['excerptFontSize']                    = Helpers::sanitize_attribute( $attributes, 'excerptFontSize', 'int' );
+		$attributes['excerptTextColor']                   = Helpers::sanitize_attribute( $attributes, 'excerptTextColor', 'text' );
+		$attributes['readMoreButtonText']                 = Helpers::sanitize_attribute( $attributes, 'readMoreButtonText', 'text' );
+		$attributes['readMoreButtonFont']                 = Helpers::sanitize_attribute( $attributes, 'readMoreButtonFont', 'text' );
+		$attributes['readMoreButtonTextColor']            = Helpers::sanitize_attribute( $attributes, 'readMoreButtonTextColor', 'text' );
+		$attributes['readMoreButtonTextHoverColor']       = Helpers::sanitize_attribute( $attributes, 'readMoreButtonTextHoverColor', 'text' );
+		$attributes['readMoreButtonBackgroundColor']      = Helpers::sanitize_attribute( $attributes, 'readMoreButtonBackgroundColor', 'text' );
+		$attributes['readMoreButtonBackgroundHoverColor'] = Helpers::sanitize_attribute( $attributes, 'readMoreButtonBackgroundHoverColor', 'text' );
+		$attributes['readMoreButtonBorder']               = Helpers::sanitize_attribute( $attributes, 'readMoreButtonBorder', 'int' );
+		$attributes['readMoreButtonBorderColor']          = Helpers::sanitize_attribute( $attributes, 'readMoreButtonBorderColor', 'text' );
+		$attributes['readMoreButtonBorderRadius']         = Helpers::sanitize_attribute( $attributes, 'readMoreButtonBorderRadius', 'int' );
+		$attributes['showPagination']                     = Helpers::sanitize_attribute( $attributes, 'showPagination', 'bool' );
 
 		/**
 		 * Filter the post query.
@@ -140,7 +140,7 @@ class Posts {
 		 * @param array  $attributes The passed attributes.
 		 * @param string $post_type  The post type.
 		 * @param int    $term       The term ID.
-		 * @parma string $taxonomy   The taxonomy.
+		 * @param string $taxonomy   The taxonomy.
 		 */
 		$post_args = apply_filters( 'ptam_featured_post_by_term_query', $post_args, $attributes, $post_type, $term, $taxonomy );
 		// Front page pagination fix.
@@ -370,7 +370,7 @@ class Posts {
 		}
 
 		register_block_type(
-			Functions::get_plugin_dir( 'build/block/featured-posts/block.json' ),
+			Helpers::get_plugin_dir( 'build/block/featured-posts/block.json' ),
 			array( 'render_callback' => array( $this, 'output' ) ),
 		);
 	}

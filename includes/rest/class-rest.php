@@ -5,9 +5,9 @@
  * @package PTAM
  */
 
-namespace PTAM\Includes\Rest;
+namespace MediaRon\PTAM\Rest;
 
-use PTAM\Includes\Functions as Functions;
+use MediaRon\PTAM\Helpers;
 
 /**
  * Class functions
@@ -245,7 +245,7 @@ class Rest {
 		// Get data for each term.
 		foreach ( $raw_term_results as &$term ) {
 			$term->permalink        = get_term_link( $term );
-			$term->background_image = Functions::get_term_image(
+			$term->background_image = Helpers::get_term_image(
 				$background_image_size,
 				$background_image_meta_key,
 				$background_image_source,
@@ -386,9 +386,9 @@ class Rest {
 		}
 		$return = array(
 			'posts'       => $posts,
-			'image_sizes' => Functions::get_all_image_sizes(),
+			'image_sizes' => Helpers::get_all_image_sizes(),
 			'taxonomies'  => $taxonomies,
-			'fonts'       => Functions::get_fonts(),
+			'fonts'       => Helpers::get_fonts(),
 		);
 		die( wp_json_encode( $return ) );
 	}
@@ -591,9 +591,9 @@ class Rest {
 		}
 		$return = array(
 			'posts'       => $posts,
-			'image_sizes' => Functions::get_all_image_sizes(),
+			'image_sizes' => Helpers::get_all_image_sizes(),
 			'taxonomies'  => $taxonomies,
-			'fonts'       => Functions::get_fonts(),
+			'fonts'       => Helpers::get_fonts(),
 		);
 		die( wp_json_encode( $return ) );
 	}
