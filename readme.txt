@@ -1,4 +1,4 @@
-=== Custom Query Blocks ===
+=== Post Type Archive Mapping ===
 Contributors: ronalfy, chrislogan, paaljoachim
 Tags: map pages, archives, post type block, 404 page, category grid
 Requires at least: 5.5
@@ -210,7 +210,6 @@ Yes, just post in the support forums here and I'll do my best to address your is
 * Fixing PHP notice saying invalid argument for foreach statement.
 
 = 3.3.0 =
-
 * Released 2020-03-11
 * New full post mode for showing off the full post.
 * Option to remove the link from the title.
@@ -243,17 +242,14 @@ Yes, just post in the support forums here and I'll do my best to address your is
 * Added support for Adobe fonts through https://wordpress.org/plugins/custom-typekit-fonts/
 
 = 3.0.9 =
-
 * Released 2019-12-08
 * Added the ability to set a fallback image for the featured image.
 
 = 3.0.7 =
-
 * Released 2019-12-05
 * Fixing pagination when a page with the Gutenberg block is set as the front page.
 
 = 3.0.6 =
-
 * Released 2019-12-05
 * Moving featured image to its own panel in Gutenberg settings.
 * Moving title to its own panel in Gutenberg settings.
