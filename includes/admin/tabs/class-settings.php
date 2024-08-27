@@ -122,7 +122,7 @@ class Settings extends Tabs {
 					<div class="notice notice-success is-dismissible">
 						<p>
 							<?php
-							esc_html_e( 'Archive Pages Pro contains archive mapping and much more. Please check it out today.', 'dlx-ratings-nag' );
+							esc_html_e( 'Archive Pages Pro contains archive mapping, author mapping, and much more. Please check it out today.', 'dlx-ratings-nag' );
 							?>
 						</p>
 						<p>

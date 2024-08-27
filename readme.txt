@@ -4,7 +4,7 @@ Tags: map pages, archives, post type block, 404 page, category grid
 Requires at least: 5.5
 Requires PHP: 5.6
 Tested up to: 6.6
-Stable tag: 5.3.0
+Stable tag: 5.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://github.com/MediaRon/post-type-archive-mapping
@@ -17,7 +17,7 @@ A WordPress plugin for displaying posts and terms (e.g., categories) using a Gut
 
 Bonus: archive mapping.
 
-> Note: (2021-07-28) The blocks are deprecated as there are better custom query items and the new Query block in WordPress 5.8. Thank you for trying us out.
+> **Archive Pages Pro is here**: Map post types, terms, authors, and more to pages. <a href="https://dlxplugins.com/plugins/archive-pages-pro/">Learn more about Archive Pages Pro</a>
 
 <ul>
 	<li>Map your post type archives to a page for customization of the post type archive page.</li>
@@ -64,6 +64,10 @@ This plugin allows you to map a page to your 404 template, so you can customize 
 === Development is on GitHub ===
 
 <a href="https://github.com/MediaRon/post-type-archive-mapping">Development is on GitHub</a>
+
+=== Archive Pages Pro ===
+
+Archive Pages Pro has all the mapping feature of this plugin and more. You can map post types, terms, authors, and more to pages. <a href="https://dlxplugins.com/plugins/archive-pages-pro/">Learn more about Archive Pages Pro</a>
 
 == Installation ==
 
