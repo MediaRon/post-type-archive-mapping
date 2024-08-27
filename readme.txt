@@ -122,8 +122,14 @@ Yes, just post in the support forums here and I'll do my best to address your is
 
 == Changelog ==
 
+= 5.3.1 =
+* Released 2024-08-27
+* Fixing some deprecation notices in blocks.
+* Adding information about new plugin Archive Pages Pro.
+* Misc. copy updates.
+
 = 5.3.0 =
-* Released TBD
+* Released 2024-07-10
 * Hardening REST APIs based on security report from the WordPress security team.
 * This is a security release and we recommend updating as soon as possible.
 
@@ -360,5 +366,5 @@ Yes, just post in the support forums here and I'll do my best to address your is
 
 == Upgrade Notice ==
 
-= 5.3.0 =
-Fixing a security issue with the REST API and retrieving post data.
+= 5.3.1 =
+Misc. blog and copy updates. Fixing some deprecation notices in blocks.
