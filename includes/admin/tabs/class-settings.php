@@ -7,8 +7,8 @@
 
 namespace PTAM\Includes\Admin\Tabs;
 
-use PTAM\Includes\Functions as Functions;
-use PTAM\Includes\Admin\Options as Options;
+use PTAM\Includes\Functions;
+use PTAM\Includes\Admin\Options;
 
 /**
  * Output the settings tab and content.
@@ -29,6 +29,24 @@ class Settings extends Tabs {
 		add_filter( 'ptam_admin_tabs', array( $this, 'add_tab' ), 1, 1 );
 		add_filter( 'ptam_admin_sub_tabs', array( $this, 'add_sub_tab' ), 1, 3 );
 		add_action( 'ptam_output_' . $this->tab, array( $this, 'output_settings' ), 1, 3 );
+		add_action( 'wp_ajax_ptam_dismiss_notice', array( $this, 'ajax_dismiss_notice' ) );
+	}
+
+	/**
+	 * Dismiss the notice.
+	 */
+	public function ajax_dismiss_notice() {
+		// Check the nonce.
+		check_ajax_referer( 'dlx-app-nag', 'nonce' );
+
+		// Get the current user ID.
+		$user_id = get_current_user_id();
+
+		// Set user meta to dismiss the ratings nag.
+		update_user_meta( $user_id, 'dlx_app_nag_dismissed', true );
+
+		// Return a success message.
+		wp_send_json_success();
 	}
 
 	/**
@@ -74,6 +92,20 @@ class Settings extends Tabs {
 	public function output_settings( $tab, $sub_tab = '' ) {
 		if ( $this->tab === $tab ) {
 			if ( empty( $sub_tab ) || $this->tab === $sub_tab ) {
+				wp_enqueue_script(
+					'ptam-app-dismiss',
+					Functions::get_plugin_url( 'includes/admin/js/app-dismiss.js' ),
+					array(),
+					'1.0.0',
+					true
+				);
+				wp_localize_script(
+					'ptam-app-dismiss',
+					'ptam_app_dismiss',
+					array(
+						'nonce' => wp_create_nonce( 'dlx-app-nag' ),
+					)
+				);
 				if ( isset( $_POST['submit'] ) && isset( $_POST['options'] ) ) {
 					check_admin_referer( 'save_ptam_' . $this->tab );
 					$options = wp_unslash( $_POST['options'] ); // phpcs:ignore
@@ -82,6 +114,25 @@ class Settings extends Tabs {
 				}
 				// Get options and defaults.
 				$options = Options::get_options( true );
+
+				// Get dismissal meta.
+				$dismissed = get_user_meta( get_current_user_id(), 'dlx_app_nag_dismissed', true );
+				if ( ! $dismissed ) :
+					?>
+					<div class="notice notice-success is-dismissible">
+						<p>
+							<?php
+							esc_html_e( 'Archive Pages Pro contains archive mapping and much more. Please check it out today.', 'dlx-ratings-nag' );
+							?>
+						</p>
+						<p>
+							<a href="https://dlxplugins.com/plugins/archive-pages-pro/" class="button button-primary" target="_blank" rel="noopener noreferrer">
+								<?php esc_html_e( 'Visit Archive Pages Pro', 'dlx-ratings-nag' ); ?>
+							</a>
+						</p>
+					</div>
+					<?php
+				endif;
 				?>
 				<form action="<?php echo esc_url( Functions::get_settings_url( $this->tab ) ); ?>" method="POST">
 					<?php wp_nonce_field( 'save_ptam_' . $this->tab ); ?>

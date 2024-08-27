@@ -22,9 +22,31 @@ class Admin_Settings {
 		// For the admin interface.
 		add_action( 'admin_menu', array( $this, 'register_settings_menu' ) );
 		add_action( 'plugin_action_links_' . Functions::get_plugin_path(), array( $this, 'plugin_settings_link' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'filter_plugin_row_meta' ), 10, 2 );
 
 		new \PTAM\Includes\Admin\Tabs\Settings();
 		new \PTAM\Includes\Admin\Tabs\Support();
+	}
+
+	/**
+	 * Filters the array of row meta for each plugin in the Plugins list table.
+	 *
+	 * @param array<int, string> $plugin_meta An array of the plugin's metadata.
+	 * @param string             $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @return array<int, string> Updated array of the plugin's metadata.
+	 */
+	public function filter_plugin_row_meta( array $plugin_meta, $plugin_file ) {
+		if ( 'post-type-archive-mapping/post-type-archive-mapping.php' !== $plugin_file ) {
+			return $plugin_meta;
+		}
+
+		$plugin_meta[] = sprintf(
+			'<a href="%1$s" style="color: green;"><span class="dashicons dashicons-star-filled" aria-hidden="true" style="font-size:14px;line-height:1.3; color: green;"></span>%2$s</a>',
+			'https://dlxplugins.com/plugins/archive-pages-pro/',
+			esc_html_x( 'Get Archive Pages Pro', 'verb', 'post-type-archive-mapping' )
+		);
+
+		return $plugin_meta;
 	}
 
 	/**
@@ -48,11 +70,6 @@ class Admin_Settings {
 			'<a href="%s">%s</a>',
 			esc_url( Functions::get_settings_url( 'support' ) ),
 			esc_html__( 'Support', 'post-type-archive-mapping' )
-		);
-		$admin_settings_links[] = sprintf(
-			'<a href="%s" style="color: #f60098;" target="_blank">%s</a>',
-			esc_url( PTAM_SPONSORS_URL ),
-			esc_html__( 'Sponsor', 'post-type-archive-mapping' )
 		);
 		if ( ! is_array( $settings ) ) {
 			return $admin_settings_links;
