@@ -7,9 +7,9 @@
 
 namespace PTAM\Includes\Blocks\Custom_Post_Types;
 
-use PTAM\Includes\Admin\Options as Options;
+use PTAM\Includes\Admin\Options;
 
-use PTAM\Includes\Functions as Functions;
+use PTAM\Includes\Functions;
 
 /**
  * Custom Post Types Block helper methods.
@@ -80,21 +80,19 @@ class Custom_Post_Types {
 						get_avatar( $post_author, $attributes['avatarSize'] )
 					);
 				}
-			} else {
-				if ( ! $attributes['removeStyles'] ) {
+			} elseif ( ! $attributes['removeStyles'] ) {
 					$list_item_markup .= sprintf(
 						'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
 						esc_url( get_permalink( $post_id ) ),
 						wp_get_attachment_image( $post_thumb_id, $post_thumb_size ),
 						'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['imageAlignment']}'" : ''
 					);
-				} else {
-					$list_item_markup .= sprintf(
-						'<div class="ptam-block-post-grid-image"><a href="%1$s" rel="bookmark">%2$s</a></div>',
-						esc_url( get_permalink( $post_id ) ),
-						wp_get_attachment_image( $post_thumb_id, $post_thumb_size )
-					);
-				}
+			} else {
+				$list_item_markup .= sprintf(
+					'<div class="ptam-block-post-grid-image"><a href="%1$s" rel="bookmark">%2$s</a></div>',
+					esc_url( get_permalink( $post_id ) ),
+					wp_get_attachment_image( $post_thumb_id, $post_thumb_size )
+				);
 			}
 			echo $list_item_markup; // phpcs:ignore
 		}
@@ -282,7 +280,14 @@ class Custom_Post_Types {
 
 				if ( $attributes['displayTitle'] ) {
 					if ( ! $attributes['removeStyles'] ) {
-						if ( $post_type_object->publicly_queryable && $display_post_anchor_link ) {
+						$allowed_tags = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
+						$heading_tag = 'h2';
+						if ( ! in_array( strtolower( $attributes['titleHeadingTag'] ), $allowed_tags, true ) ) {
+							$heading_tag = 'h2';
+						} else {
+							$heading_tag = $attributes['titleHeadingTag'];
+						}
+						if ( $post_type_object->public && $display_post_anchor_link ) {
 							$list_items_markup .= sprintf(
 								'<%5$s class="ptam-block-post-grid-title" %3$s><a href="%1$s" rel="bookmark" style="%4$s">%2$s</a></%5$s>',
 								esc_url( get_permalink( $post_id ) ),
@@ -293,29 +298,27 @@ class Custom_Post_Types {
 									esc_attr( $attributes['titleColor'] ),
 									esc_attr( $attributes['titleFont'] )
 								),
-								$attributes['titleHeadingTag']
+								$heading_tag
 							);
 						} else {
 							$list_items_markup .= sprintf(
 								'<%3$s class="ptam-block-post-grid-title" %2$s>%1$s</%3$s>',
 								esc_html( $title ),
 								( 'grid' === $attributes['postLayout'] && ! $attributes['removeStyles'] ) ? "style='text-align: {$attributes['titleAlignment']}; color: {$attributes['titleColor']}; font-family: {$attributes['titleFont']}'" : '',
-								wp_kses_post( $attributes['titleHeadingTag'] )
+								$heading_tag
 							);
 						}
-					} else {
-						if ( $post_type_object->publicly_queryable && $display_post_anchor_link ) {
+					} elseif ( $post_type_object->publicly_queryable && $display_post_anchor_link ) {
 							$list_items_markup .= sprintf(
 								'<h2 class="ptam-block-post-grid-title"><a href="%1$s" rel="bookmark">%2$s</a></h2>',
 								esc_url( get_permalink( $post_id ) ),
 								esc_html( $title )
 							);
-						} else {
-							$list_items_markup .= sprintf(
-								'<h2 class="ptam-block-post-grid-title">%1$s</h2>',
-								esc_html( $title )
-							);
-						}
+					} else {
+						$list_items_markup .= sprintf(
+							'<h2 class="ptam-block-post-grid-title">%1$s</h2>',
+							esc_html( $title )
+						);
 					}
 				}
 
