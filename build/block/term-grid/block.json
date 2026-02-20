@@ -1,7 +1,7 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "title": "Term Grid",
-  "apiVersion": 1,
+  "apiVersion": 3,
   "name": "ptam/term-grid",
   "category": "ptam-custom-query-blocks",
   "icon": "<svg aria-hidden='true' focusable='false' data-prefix='fad' data-icon='th-large' class='svg-inline--fa fa-th-large fa-w-16' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><g class='fa-group'><path class='fa-secondary' fill='#585aa8' d='M488 272H296a24 24 0 0 0-24 24v160a24 24 0 0 0 24 24h192a24 24 0 0 0 24-24V296a24 24 0 0 0-24-24zm-272 0H24a24 24 0 0 0-24 24v160a24 24 0 0 0 24 24h192a24 24 0 0 0 24-24V296a24 24 0 0 0-24-24z' opacity='0.4'></path><path class='fa-primary' fill='#585aa8' d='M488 32H296a24 24 0 0 0-24 24v160a24 24 0 0 0 24 24h192a24 24 0 0 0 24-24V56a24 24 0 0 0-24-24zm-272 0H24A24 24 0 0 0 0 56v160a24 24 0 0 0 24 24h192a24 24 0 0 0 24-24V56a24 24 0 0 0-24-24z'></path></g></svg>",

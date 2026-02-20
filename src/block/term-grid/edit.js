@@ -8,9 +8,9 @@ import hexToRgba from "hex-to-rgba";
 import TermListControl from "../components/TermListControl";
 var HtmlToReactParser = require("html-to-react").Parser;
 
-const { Component, Fragment } = wp.element;
+const { Fragment, useState, useEffect, useCallback } = wp.element;
 
-const { __, _n } = wp.i18n;
+const { __, _n, sprintf } = wp.i18n;
 
 const { decodeEntities } = wp.htmlEntities;
 
@@ -29,128 +29,106 @@ const {
 	MediaUpload,
 	InspectorControls,
 	PanelColorSettings,
+	useBlockProps,
 } = wp.blockEditor;
 
 const MAX_POSTS_COLUMNS = 6;
 
-class PTAM_Term_Grid extends Component {
-	constructor() {
-		super(...arguments);
+function PTAM_Term_GridEdit( props ) {
+	const { attributes, setAttributes } = props;
 
-		this.state = {
-			loading: true,
-			termLoading: false,
-			fonts: [],
-			taxonomy: "category",
-			termsToDisplay: {},
-			termsToExclude: {},
-			terms: [],
-			termsExclude: [],
-			imageSizes: ptam_globals.image_sizes,
-		};
+	const [ loading, setLoading ] = useState( true );
+	const [ termLoading, setTermLoading ] = useState( false );
+	const [ terms, setTerms ] = useState( [] );
+	const [ termsExclude, setTermsExclude ] = useState( [] );
+	const [ termsToDisplay, setTermsToDisplay ] = useState( {} );
 
-		//this.get_latest_data();
-	}
+	const imageSizes = ptam_globals.image_sizes || {};
 
-	getTerms = (object = {}) => {
-		let termsList = [];
-		let termsListExclude = [];
-		let { taxonomy, terms, termsExclude } = this.props.attributes;
-		this.setState({
-			loading: true,
-		});
+	const getTerms = useCallback( ( object = {} ) => {
+		const merged = jQuery.extend( {}, attributes, object );
+		const { taxonomy: tax, terms: attTerms, termsExclude: attTermsExclude } = merged;
+		setLoading( true );
 		axios
-			.post(ptam_globals.rest_url + `ptam/v2/get_tax_terms`, {
-				taxonomy: taxonomy,
-			}, {
-				headers: {
-					"X-WP-Nonce": ptam_globals.rest_nonce
+			.post(
+				ptam_globals.rest_url + "ptam/v2/get_tax_terms",
+				{ taxonomy: tax },
+				{
+					headers: { "X-WP-Nonce": ptam_globals.rest_nonce },
 				}
-
-			})
-			.then((response) => {
-				if (Object.keys(response.data).length > 0) {
-					termsList.push({
+			)
+			.then( ( response ) => {
+				const termsList = [];
+				const termsListExclude = [];
+				if ( Object.keys( response.data ).length > 0 ) {
+					termsList.push( {
 						id: 0,
-						name: __("All", "post-type-archive-mapping"),
-						selected: terms.length === 0 || terms[0].id === 0,
-					});
-					// Build a list of terms.
-					const excludeTermIds = [];
-					termsExclude.forEach(function (termObject) {
-						excludeTermIds.push(termObject.id);
-					});
-					const includeTermIds = [];
-					terms.forEach(function (termObject) {
-						includeTermIds.push(termObject.id);
-					});
-					jQuery.each(response.data, function (key, value) {
-						// See if term_id matches exclude list.
-						termsListExclude.push({ id: value.term_id, name: value.name, selected: excludeTermIds.includes( value.term_id ) });
-						termsList.push({ id: value.term_id, name: value.name, selected: includeTermIds.includes( value.term_id )});
-					});
+						name: __( "All", "post-type-archive-mapping" ),
+						selected: ! attTerms || attTerms.length === 0 || attTerms[ 0 ].id === 0,
+					} );
+					const excludeTermIds = ( attTermsExclude || [] ).map( ( t ) => t.id );
+					const includeTermIds = ( attTerms || [] ).map( ( t ) => t.id );
+					jQuery.each( response.data, function ( key, value ) {
+						termsListExclude.push( {
+							id: value.term_id,
+							name: value.name,
+							selected: excludeTermIds.includes( value.term_id ),
+						} );
+						termsList.push( {
+							id: value.term_id,
+							name: value.name,
+							selected: includeTermIds.includes( value.term_id ),
+						} );
+					} );
 				}
-				this.setState({
-					loading: false,
-					terms: termsList,
-					termsExclude: termsListExclude,
-				});
-				this.displayTerms({ value: termsList });
-			});
-	};
-	displayTerms = () => {
+				setLoading( false );
+				setTerms( termsList );
+				setTermsExclude( termsListExclude );
+				displayTerms();
+			} );
+	}, [ attributes ] );
+
+	const displayTerms = useCallback( () => {
 		const {
 			order,
 			orderBy,
-			taxonomy,
-			termsExclude,
-			terms,
+			taxonomy: tax,
+			termsExclude: attTermsExclude,
+			terms: attTerms,
 			backgroundImageSource,
 			backgroundImageFallback,
 			backgroundImageMeta,
 			imageSize,
-		} = this.props.attributes;
-		let termsToRetrieve = [];
-		let termsToExclude = [];
-		terms.forEach(function (termObject) {
-			termsToRetrieve.push(termObject.id);
-		});
-		termsExclude.forEach(function (termObject) {
-			termsToExclude.push(termObject.id);
-		});
-		this.setState({
-			termLoading: true,
-		});
+		} = attributes;
+		const termsToRetrieve = ( attTerms || [] ).map( ( t ) => t.id );
+		const termsToExcludeIds = ( attTermsExclude || [] ).map( ( t ) => t.id );
+		setTermLoading( true );
 		axios
-			.post(ptam_globals.rest_url + `ptam/v2/get_tax_term_data`, {
-				terms: termsToRetrieve,
-				termsExclude: termsToExclude,
-				order: order,
-				orderBy: orderBy,
-				taxonomy: taxonomy,
-				backgroundImageSource: backgroundImageSource,
-				backgroundImageFallback: backgroundImageFallback,
-				backgroundImageMeta: backgroundImageMeta,
-			}, {
-				headers: {
-					"X-WP-Nonce": ptam_globals.rest_nonce
+			.post(
+				ptam_globals.rest_url + "ptam/v2/get_tax_term_data",
+				{
+					terms: termsToRetrieve,
+					termsExclude: termsToExcludeIds,
+					order: order,
+					orderBy: orderBy,
+					taxonomy: tax,
+					backgroundImageSource: backgroundImageSource,
+					backgroundImageFallback: backgroundImageFallback,
+					backgroundImageMeta: backgroundImageMeta,
+				},
+				{
+					headers: { "X-WP-Nonce": ptam_globals.rest_nonce },
 				}
-
-			} )
-			.then((response) => {
-				if (Object.keys(response.data).length > 0) {
-					this.setState({
-						termsToDisplay: response.data.term_data,
-					});
+			)
+			.then( ( response ) => {
+				if ( Object.keys( response.data ).length > 0 ) {
+					setTermsToDisplay( response.data.term_data );
 				}
-				this.setState({
-					termLoading: false,
-				});
-			});
-	};
-
-	getTermHtml = () => {
-		const terms = this.state.termsToDisplay;
+				setTermLoading( false );
+			} );
+	}, [ attributes ] );
+	const getTermHtml = () => {
+		const termsData = termsToDisplay;
 		const htmlToReactParser = new HtmlToReactParser();
 		const {
 			linkContainer,
@@ -175,111 +153,106 @@ class PTAM_Term_Grid extends Component {
 			termButtonBorder,
 			termButtonBorderColor,
 			termButtonBorderRadius,
-		} = this.props.attributes;
-		if (Object.keys(terms).length === 0) {
+		} = attributes;
+		if ( ! termsData || Object.keys( termsData ).length === 0 ) {
 			return (
-				<h2>{__("No terms could be found.", "post-type-archive-mapping")}</h2>
+				<h2>{ __( "No terms could be found.", "post-type-archive-mapping" ) }</h2>
 			);
 		}
-		const termTitleStyles = !disableStyles
+		const termTitleStyles = ! disableStyles
 			? {
 					color: termTitleColor,
 					fontFamily: `${termTitleFont}`,
 			  }
 			: {};
-		const termDescriptionStyles = !disableStyles
+		const termDescriptionStyles = ! disableStyles
 			? {
 					color: termDescriptionColor,
-					fontFamily: `${termDescriptionFont}`,
+					fontFamily: termDescriptionFont,
 			  }
 			: {};
-
-		const termButtonStyles = !disableStyles
+		const termButtonStyles = ! disableStyles
 			? {
 					color: termButtonTextColor,
 					backgroundColor: termButtonBackgroundColor,
 					borderWidth: termButtonBorder + "px",
 					borderColor: termButtonBorderColor,
-					borderRadius: termButtonBorderRadius,
-					fontFamily: `${termButtonFont}`,
+					borderRadius: termButtonBorderRadius + "px",
+					fontFamily: termButtonFont,
 					borderStyle: "solid",
 			  }
 			: {};
-		return Object.keys(terms).map((i) => (
-			<Fragment key={i}>
+		return Object.keys( termsData ).map( ( i ) => (
+			<Fragment key={ i }>
 				<div
 					className="ptam-term-grid-item"
 					style={
-						"image" === backgroundType && !disableStyles
+						"image" === backgroundType && ! disableStyles
 							? {
-									backgroundImage: `url(${terms[i].background_image})`,
-									borderWidth: `${itemBorder}px`,
-									borderColor: `${itemBorderColor}`,
-									borderRadius: `${itemBorderRadius}%`,
+									backgroundImage: `url(${ termsData[ i ].background_image })`,
+									borderWidth: `${ itemBorder }px`,
+									borderColor: itemBorderColor,
+									borderRadius: `${ itemBorderRadius }%`,
 									borderStyle: "solid",
 							  }
-							: !disableStyles
+							: ! disableStyles
 							? {
-									borderWidth: `${itemBorder}px`,
-									borderColor: `${itemBorderColor}`,
-									borderRadius: `${itemBorderRadius}%`,
+									borderWidth: `${ itemBorder }px`,
+									borderColor: itemBorderColor,
+									borderRadius: `${ itemBorderRadius }%`,
 									borderStyle: "solid",
 							  }
 							: {}
 					}
 				>
 					<div className="ptam-term-grid-item-content">
-						{showTermTitle && (
-							<h2 style={termTitleStyles}>
-								{i in terms
-									? terms[i].name
-									: __("Unknown Title", "post-type-archive-mapping")}
+						{ showTermTitle && (
+							<h2 style={ termTitleStyles }>
+								{ i in termsData
+									? termsData[ i ].name
+									: __( "Unknown Title", "post-type-archive-mapping" ) }
 							</h2>
-						)}
-						{showTermDescription && (
+						) }
+						{ showTermDescription && (
 							<div
 								className="ptam-term-grid-item-description"
-								style={termDescriptionStyles}
+								style={ termDescriptionStyles }
 							>
-								{i in terms
-									? htmlToReactParser.parse(terms[i].description)
-									: ""}
+								{ i in termsData
+									? htmlToReactParser.parse( termsData[ i ].description )
+									: "" }
 							</div>
-						)}
-						{!linkContainer && showButton && (
+						) }
+						{ ! linkContainer && showButton && (
 							<a
 								href="#"
 								className="ptam-term-grid-button btn button"
-								style={termButtonStyles}
+								style={ termButtonStyles }
 							>
-								{termButtonText}
+								{ termButtonText }
 							</a>
-						)}
+						) }
 					</div>
 				</div>
 			</Fragment>
-		));
+		) );
 	};
 
-	componentDidMount = () => {
-		this.getTerms(this.state);
-	};
+	useEffect( () => {
+		getTerms( {} );
+	}, [] );
 
-	render() {
-		if (this.props.attributes.preview) {
-			return (
-				<Fragment>
-					<img src={ptam_globals.term_grid_block_preview} />
-				</Fragment>
-			);
-		}
+	if ( attributes.preview ) {
+		return (
+			<Fragment>
+				<img src={ ptam_globals.term_grid_block_preview } />
+			</Fragment>
+		);
+	}
 
-		let htmlToReactParser = new HtmlToReactParser();
-		const { attributes, setAttributes } = this.props;
-		const {
-			terms,
-			termsExclude,
-			taxonomy,
+	const htmlToReactParser = new HtmlToReactParser();
+	const {
+		taxonomy,
 			align,
 			order,
 			orderBy,
@@ -338,8 +311,7 @@ class PTAM_Term_Grid extends Component {
 
 		// Image Sizes.
 		let imageSizeOptions = [];
-		let imageSizes = this.state.imageSizes;
-		for (var key in imageSizes) {
+		for ( var key in imageSizes ) {
 			imageSizeOptions.push({ value: key, label: key });
 		}
 
@@ -421,14 +393,12 @@ class PTAM_Term_Grid extends Component {
 
 		// Whether to show term exclusion or not.
 		let showTermExclude = false;
-		const stateTerms = this.state.terms;
-		if (Array.isArray(stateTerms)) {
-			stateTerms.forEach(function (termObject) {
-				if (0 === termObject.id && termObject.selected === true) {
+		if ( Array.isArray( terms ) ) {
+			terms.forEach( function ( termObject ) {
+				if ( 0 === termObject.id && termObject.selected === true ) {
 					showTermExclude = true;
-					return;
 				}
-			});
+			} );
 		}
 
 		// Get background color with opacity.
@@ -438,6 +408,10 @@ class PTAM_Term_Grid extends Component {
 		const overlayColorHoverRGBA = overlayColorHover
 			? hexToRgba(overlayColorHover, overlayOpacityHover)
 			: "";
+
+		const blockProps = useBlockProps( {
+			className: classnames( "columns-" + columns, "ptam-term-grid" ),
+		} );
 
 		const inspectorControls = (
 			<InspectorControls>
@@ -450,13 +424,12 @@ class PTAM_Term_Grid extends Component {
 						options={taxOptions}
 						value={taxonomy}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								taxonomy: value,
 								terms: [],
 								termsExclude: [],
 							});
-							this.props.attributes.taxonomy = value;
-							this.getTerms({ taxonomy: value });
+							getTerms( { taxonomy: value } );
 						}}
 					/>
 					<SelectControl
@@ -464,9 +437,8 @@ class PTAM_Term_Grid extends Component {
 						options={orderOptions}
 						value={order}
 						onChange={(value) => {
-							this.props.setAttributes({ order: value });
-							this.props.attributes.order = value;
-							this.displayTerms();
+							setAttributes( { order: value } );
+							displayTerms();
 						}}
 					/>
 					<SelectControl
@@ -474,22 +446,20 @@ class PTAM_Term_Grid extends Component {
 						options={orderByOptions}
 						value={orderBy}
 						onChange={(value) => {
-							this.props.setAttributes({ orderBy: value });
-							this.props.attributes.orderBy = value;
-							this.displayTerms();
+							setAttributes( { orderBy: value } );
+							displayTerms();
 						}}
 					/>
 					{
-						this.state.terms.length > 0 && (
+						terms.length > 0 && (
 							<>
 								<h2>{__("Terms to Include", "post-type-archive-mapping")}</h2>
 								<TermListControl
 									className="ptam-term-select"
-									terms={this.state.terms}
+									terms={terms}
 									onChange={(newTerms) => {
-										this.props.setAttributes({ terms: newTerms });
-										this.props.attributes.terms = newTerms;
-										this.displayTerms();
+										setAttributes( { terms: newTerms } );
+										displayTerms();
 									}}
 									hasSelectAll={ true }
 								/>
@@ -503,11 +473,10 @@ class PTAM_Term_Grid extends Component {
 							<h2>{__("Terms to Exclude", "post-type-archive-mapping")}</h2>
 							<TermListControl
 								className="ptam-term-exclude"
-								terms={this.state.termsExclude}
+								terms={termsExclude}
 								onChange={(newTerms) => {
-									this.props.setAttributes({ termsExclude: newTerms });
-									this.props.attributes.termsExclude = newTerms;
-									this.displayTerms();
+setAttributes( { termsExclude: newTerms } );
+								displayTerms();
 								}}
 								messages={termMessagesExclude}
 							/>
@@ -521,7 +490,7 @@ class PTAM_Term_Grid extends Component {
 					<RangeControl
 						label={__("Columns", "post-type-archive-mapping")}
 						value={columns}
-						onChange={(value) => this.props.setAttributes({ columns: value })}
+						onChange={(value) => setAttributes({ columns: value })}
 						min={1}
 						max={4}
 					/>
@@ -529,7 +498,7 @@ class PTAM_Term_Grid extends Component {
 						label={__("Show Term Title", "post-type-archive-mapping")}
 						checked={showTermTitle}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								showTermTitle: value,
 							});
 						}}
@@ -538,7 +507,7 @@ class PTAM_Term_Grid extends Component {
 						label={__("Show Term Description", "post-type-archive-mapping")}
 						checked={showTermDescription}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								showTermDescription: value,
 							});
 						}}
@@ -548,7 +517,7 @@ class PTAM_Term_Grid extends Component {
 						options={backgroundTypeOptions}
 						value={backgroundType}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								backgroundType: value,
 							});
 						}}
@@ -605,7 +574,7 @@ class PTAM_Term_Grid extends Component {
 						label={__("Disable Styles", "post-type-archive-mapping")}
 						checked={disableStyles}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								disableStyles: value,
 							});
 						}}
@@ -617,7 +586,7 @@ class PTAM_Term_Grid extends Component {
 						)}
 						checked={linkContainer}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								linkContainer: value,
 							});
 						}}
@@ -628,7 +597,7 @@ class PTAM_Term_Grid extends Component {
 								label={__("Link Term Title", "post-type-archive-mapping")}
 								checked={linkTermTitle}
 								onChange={(value) => {
-									this.props.setAttributes({
+									setAttributes({
 										linkTermTitle: value,
 									});
 								}}
@@ -637,7 +606,7 @@ class PTAM_Term_Grid extends Component {
 								label={__("Show Button", "post-type-archive-mapping")}
 								checked={showButton}
 								onChange={(value) => {
-									this.props.setAttributes({
+									setAttributes({
 										showButton: value,
 									});
 								}}
@@ -653,7 +622,7 @@ class PTAM_Term_Grid extends Component {
 						type="text"
 						value={containerId}
 						onChange={(value) =>
-							this.props.setAttributes({ containerId: value })
+							setAttributes({ containerId: value })
 						}
 					/>
 				</PanelBody>
@@ -671,7 +640,7 @@ class PTAM_Term_Grid extends Component {
 								options={backgroundImage}
 								value={backgroundImageSource}
 								onChange={(value) => {
-									this.props.setAttributes({ backgroundImageSource: value });
+									setAttributes({ backgroundImageSource: value });
 								}}
 							/>
 							{"none" !== backgroundImageSource && (
@@ -681,7 +650,7 @@ class PTAM_Term_Grid extends Component {
 										options={imageSizeOptions}
 										value={imageSize}
 										onChange={(value) => {
-											this.props.setAttributes({ imageSize: value });
+											setAttributes({ imageSize: value });
 										}}
 									/>
 									<TextControl
@@ -689,15 +658,14 @@ class PTAM_Term_Grid extends Component {
 										type="text"
 										value={backgroundImageMeta}
 										onChange={(value) =>
-											this.props.setAttributes({ backgroundImageMeta: value })
+											setAttributes({ backgroundImageMeta: value })
 										}
 									/>
 									<MediaUpload
 										onSelect={(imageObject) => {
-											this.props.setAttributes({
+											setAttributes({
 												backgroundImageFallback: imageObject,
 											});
-											this.props.attributes.backgroundImageFallback = imageObject;
 										}}
 										type="image"
 										value={backgroundImageFallback.url}
@@ -729,11 +697,9 @@ class PTAM_Term_Grid extends Component {
 															<button
 																className="ptam-media-alt-reset components-button is-button is-secondary"
 																onClick={(event) => {
-																	this.props.setAttributes({
+																	setAttributes({
 																		backgroundImageFallback: "",
 																	});
-																	this.props.attributes.backgroundImageFallback =
-																		"";
 																}}
 															>
 																{__("Clear Image", "post-type-archive-mapping")}
@@ -748,7 +714,7 @@ class PTAM_Term_Grid extends Component {
 										<Button
 											isSecondary={true}
 											onClick={(event) => {
-												this.displayTerms();
+												displayTerms();
 											}}
 											className="ptam-apply"
 										>
@@ -903,7 +869,7 @@ class PTAM_Term_Grid extends Component {
 							options={fontOptions}
 							value={termTitleFont}
 							onChange={(value) => {
-								this.props.setAttributes({ termTitleFont: value });
+								setAttributes({ termTitleFont: value });
 							}}
 						/>
 						<SelectControl
@@ -911,7 +877,7 @@ class PTAM_Term_Grid extends Component {
 							options={fontOptions}
 							value={termDescriptionFont}
 							onChange={(value) => {
-								this.props.setAttributes({ termDescriptionFont: value });
+								setAttributes({ termDescriptionFont: value });
 							}}
 						/>
 					</PanelBody>
@@ -927,7 +893,7 @@ class PTAM_Term_Grid extends Component {
 								type="text"
 								value={termButtonText}
 								onChange={(value) =>
-									this.props.setAttributes({ termButtonText: value })
+									setAttributes({ termButtonText: value })
 								}
 							/>
 							<SelectControl
@@ -935,7 +901,7 @@ class PTAM_Term_Grid extends Component {
 								options={fontOptions}
 								value={termButtonFont}
 								onChange={(value) => {
-									this.props.setAttributes({ termButtonFont: value });
+									setAttributes({ termButtonFont: value });
 								}}
 							/>
 							<PanelColorSettings
@@ -1012,7 +978,7 @@ class PTAM_Term_Grid extends Component {
 				)}
 			</InspectorControls>
 		);
-		if (this.state.loading) {
+		if (loading) {
 			return (
 				<Fragment>
 					<Placeholder>
@@ -1029,7 +995,7 @@ class PTAM_Term_Grid extends Component {
 				</Fragment>
 			);
 		}
-		if (this.state.termLoading) {
+		if (termLoading) {
 			return (
 				<Fragment>
 					{inspectorControls}
@@ -1047,7 +1013,7 @@ class PTAM_Term_Grid extends Component {
 				</Fragment>
 			);
 		}
-		if (!this.state.loading && !this.state.termLoading) {
+		if ( ! loading && ! termLoading ) {
 			return (
 				<Fragment>
 					{inspectorControls}
@@ -1165,15 +1131,14 @@ class PTAM_Term_Grid extends Component {
 					)}
 
 					<div
-						id={containerId}
-						className={classnames(`columns-${columns}`, "ptam-term-grid")}
+						{ ...blockProps }
+						id={ containerId }
 					>
-						{this.getTermHtml()}
+						{ getTermHtml() }
 					</div>
 				</Fragment>
 			);
-		}
 	}
 }
 
-export default PTAM_Term_Grid;
+export default PTAM_Term_GridEdit;
