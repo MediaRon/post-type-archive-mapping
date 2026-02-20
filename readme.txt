@@ -1,10 +1,10 @@
 === Custom Query Blocks ===
 Contributors: ronalfy, chrislogan, paaljoachim
 Tags: map pages, archives, post type block, 404 page, category grid
-Requires at least: 5.5
+Requires at least: 6.5
 Requires PHP: 5.6
 Tested up to: 6.9
-Stable tag: 5.4.0
+Stable tag: 5.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://github.com/MediaRon/post-type-archive-mapping
@@ -121,6 +121,12 @@ Yes, just post in the support forums here and I'll do my best to address your is
 5. Term archive option.
 
 == Changelog ==
+
+= 5.5.0 =
+* Released 2026-02-19
+* Security Fix: Resolving XSS issue with image alignment as reported by Patchstack.
+* Bug fix: Resolving PHP warnings when registering classes.
+* Enhancement/fix: Blocks are now compatible with Block.json v3.
 
 = 5.4.0 =
 * Released 2025-11-15
@@ -370,5 +376,5 @@ Yes, just post in the support forums here and I'll do my best to address your is
 
 == Upgrade Notice ==
 
-= 5.4.0 =
-Resolving XSS vulnerability with title tag as reported via Patchstack. Ensuring compatibility with WP 6.9.
+= 5.5.0 =
+Resolving XSS vulnerability with image alignment. Fixing PHP warnings. Blocks are now block.json v3 compatible.
