@@ -60,7 +60,16 @@ class Custom_Post_Types {
 	public function get_profile_image( $attributes, $post_thumb_id = 0, $post_author = 0, $post_id = 0 ) {
 		ob_start();
 		// Get the featured image.
-		$list_item_markup = '';
+		$list_item_markup         = '';
+		$image_alignments_options = array(
+			'left',
+			'center',
+			'right',
+		);
+		$image_alignment          = Functions::sanitize_attribute( $attributes, 'imageAlignment', 'text' );
+		if ( ! in_array( $image_alignment, $image_alignments_options, true ) ) {
+			$image_alignment = 'left';
+		}
 
 		if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] ) {
 			$post_thumb_size = $attributes['imageTypeSize'];
@@ -71,7 +80,7 @@ class Custom_Post_Types {
 						'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
 						esc_url( get_permalink( $post_id ) ),
 						get_avatar( $post_author, $attributes['avatarSize'] ),
-						'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['imageAlignment']}'" : ''
+						'grid' === $attributes['postLayout'] ? "style='text-align: {$image_alignment}'" : ''
 					);
 				} else {
 					$list_item_markup .= sprintf(
@@ -85,7 +94,7 @@ class Custom_Post_Types {
 						'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
 						esc_url( get_permalink( $post_id ) ),
 						wp_get_attachment_image( $post_thumb_id, $post_thumb_size ),
-						'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['imageAlignment']}'" : ''
+						'grid' === $attributes['postLayout'] ? "style='text-align: {$image_alignment}'" : ''
 					);
 			} else {
 				$list_item_markup .= sprintf(
@@ -281,7 +290,7 @@ class Custom_Post_Types {
 				if ( $attributes['displayTitle'] ) {
 					if ( ! $attributes['removeStyles'] ) {
 						$allowed_tags = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
-						$heading_tag = 'h2';
+						$heading_tag  = 'h2';
 						if ( ! in_array( strtolower( $attributes['titleHeadingTag'] ), $allowed_tags, true ) ) {
 							$heading_tag = 'h2';
 						} else {
