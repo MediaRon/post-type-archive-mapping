@@ -8,7 +8,7 @@ import Loading from "../components/Loading";
 import hexToRgba from "hex-to-rgba";
 var HtmlToReactParser = require("html-to-react").Parser;
 
-const { Component, Fragment } = wp.element;
+const { Fragment, useState, useEffect, useCallback, useRef } = wp.element;
 
 const { __, _n } = wp.i18n;
 
@@ -32,73 +32,78 @@ const {
 	PanelColorSettings,
 	BlockAlignmentToolbar,
 	BlockControls,
+	useBlockProps,
 } = wp.blockEditor;
 
 const MAX_POSTS_COLUMNS = 1;
 
-class PTAM_Featured_Posts extends Component {
-	constructor() {
-		super(...arguments);
+function PTAM_Featured_PostsEdit( props ) {
+	const { attributes, setAttributes } = props;
 
-		this.state = {
-			loading: true,
-			taxonomy: "category",
-			postType: "post",
-			postTypes: ptam_globals.post_types,
-			imageSizes: ptam_globals.image_sizes,
-			taxonomyList: [],
-			termsList: [],
-			itemNumberTimer: 0,
-		};
+	const [ loading, setLoading ] = useState( true );
+	const [ latestPosts, setLatestPosts ] = useState( [] );
+	const [ taxonomyList, setTaxonomyList ] = useState( [] );
+	const [ termsList, setTermsList ] = useState( [] );
+	const [ userTaxonomies, setUserTaxonomies ] = useState( [] );
+	const [ userTerms, setUserTerms ] = useState( [] );
 
-		//this.get_latest_data();
-	}
+	const itemNumberTimerRef = useRef( 0 );
 
-	excerptParse = excerpt => {
-		let htmlToReactParser = new HtmlToReactParser();
-		const { excerptLength } = this.props.attributes;
+	const blockProps = useBlockProps( {
+		className: "ptam-fp-wrapper",
+	} );
 
-		excerpt = excerpt.split(" ").slice(0, excerptLength);
-		excerpt = excerpt.join(" ");
+	const postTypeOptions = ( () => {
+		const opts = [];
+		for ( const key in ptam_globals.post_types ) {
+			opts.push( {
+				value: key,
+				label: ptam_globals.post_types[ key ],
+			} );
+		}
+		return opts;
+	} )();
 
-		return htmlToReactParser.parse(excerpt);
+	const imageSizes = ptam_globals.image_sizes || {};
+
+	const excerptParse = ( excerpt ) => {
+		const parser = new HtmlToReactParser();
+		const { excerptLength: length } = attributes;
+		const trimmed = excerpt.split( " " ).slice( 0, length ).join( " " );
+		return parser.parse( trimmed );
 	};
 
-	get_term_list = (object = {}) => {
-		let termsList = [];
-		const props = jQuery.extend({}, this.props.attributes, object);
-		const { postType, taxonomy } = props;
+	const getTermList = useCallback( ( object = {} ) => {
+		const merged = jQuery.extend( {}, attributes, object );
+		const { postType, taxonomy } = merged;
 		axios
-			.post(ptam_globals.rest_url + `ptam/v2/get_terms`, {
-				taxonomy: taxonomy,
-				post_type: postType
-			},{
-				headers: {
-					"X-WP-Nonce": ptam_globals.rest_nonce
+			.post(
+				ptam_globals.rest_url + "ptam/v2/get_terms",
+				{ taxonomy: taxonomy, post_type: postType },
+				{
+					headers: { "X-WP-Nonce": ptam_globals.rest_nonce },
 				}
-
-			})
-			.then(response => {
-				if (Object.keys(response.data).length > 0) {
-					termsList.push({
+			)
+			.then( ( response ) => {
+				const list = [];
+				if ( Object.keys( response.data ).length > 0 ) {
+					list.push( {
 						value: 0,
-						label: __("All", "post-type-archive-mapping")
-					});
-					jQuery.each(response.data, function(key, value) {
-						termsList.push({ value: value.term_id, label: value.name });
-					});
+						label: __( "All", "post-type-archive-mapping" ),
+					} );
+					jQuery.each( response.data, function ( key, value ) {
+						list.push( { value: value.term_id, label: value.name } );
+					} );
 				}
-				this.setState({
-					loading: false,
-					termsList: termsList
-				});
-			});
-	}
+				setLoading( false );
+				setTermsList( list );
+			} );
+	}, [ attributes ] );
 
-	get_latest_posts(object = {}) {
-		this.setState({ loading: true });
-		const props = jQuery.extend({}, this.props.attributes, object);
-		let {
+	const getLatestPosts = useCallback( ( object = {} ) => {
+		setLoading( true );
+		const merged = jQuery.extend( {}, attributes, object );
+		const {
 			postType,
 			order,
 			orderBy,
@@ -110,46 +115,39 @@ class PTAM_Featured_Posts extends Component {
 			postsToShow,
 			imageCrop,
 			fallbackImg,
-		} = props;
+		} = merged;
 		axios
-			.post(ptam_globals.rest_url + `ptam/v2/get_posts`, {
-				post_type: postType,
-				order: order,
-				orderby: orderBy,
-				taxonomy: taxonomy,
-				term: term,
-				posts_per_page: postsToShow,
-				image_size: imageCrop,
-				avatar_size: avatarSize,
-				image_type: imageType,
-				image_size: imageTypeSize,
-				default_image: fallbackImg
-			}, {
-				headers: {
-					"X-WP-Nonce": ptam_globals.rest_nonce
+			.post(
+				ptam_globals.rest_url + "ptam/v2/get_posts",
+				{
+					post_type: postType,
+					order: order,
+					orderby: orderBy,
+					taxonomy: taxonomy,
+					term: term,
+					posts_per_page: postsToShow,
+					image_size: imageCrop,
+					avatar_size: avatarSize,
+					image_type: imageType,
+					image_size: imageTypeSize,
+					default_image: fallbackImg,
+				},
+				{
+					headers: { "X-WP-Nonce": ptam_globals.rest_nonce },
 				}
+			)
+			.then( ( response ) => {
+				setLoading( false );
+				setLatestPosts( response.data.posts );
+				setUserTaxonomies( response.data.taxonomies || [] );
+				setUserTerms( response.data.terms || [] );
+			} );
+	}, [ attributes ] );
 
-			} )
-			.then(response => {
-				// Now Set State
-				this.setState({
-					loading: false,
-					latestPosts: response.data.posts,
-					userTaxonomies: response.data.taxonomies,
-					userTerms: response.data.terms
-				});
-			});
-	}
-
-	get_latest_data = (object = {}) => {
-		this.setState({ loading: true });
-		let latestPosts = [];
-		let taxonomyList = [];
-		let termsList = [];
-		let userTaxonomies = [];
-		let userTerms = [];
-		const props = jQuery.extend({}, this.props.attributes, object);
-		let {
+	const getLatestData = useCallback( ( object = {} ) => {
+		setLoading( true );
+		const merged = jQuery.extend( {}, attributes, object );
+		const {
 			postType,
 			order,
 			orderBy,
@@ -161,96 +159,99 @@ class PTAM_Featured_Posts extends Component {
 			postsToShow,
 			imageCrop,
 			fallbackImg,
-		} = props;
+		} = merged;
 
-		// Get Latest Posts and Chain Promises
 		axios
-			.post(ptam_globals.rest_url + `ptam/v2/get_featured_posts`, {
-				post_type: postType,
-				order: order,
-				orderby: orderBy,
-				taxonomy: taxonomy,
-				term: term,
-				posts_per_page: postsToShow,
-				image_size: imageCrop,
-				avatar_size: avatarSize,
-				image_type: imageType,
-				image_size: imageTypeSize,
-				default_image: fallbackImg,
-			}, {
-				headers: {
-					"X-WP-Nonce": ptam_globals.rest_nonce
+			.post(
+				ptam_globals.rest_url + "ptam/v2/get_featured_posts",
+				{
+					post_type: postType,
+					order: order,
+					orderby: orderBy,
+					taxonomy: taxonomy,
+					term: term,
+					posts_per_page: postsToShow,
+					image_size: imageCrop,
+					avatar_size: avatarSize,
+					image_type: imageType,
+					image_size: imageTypeSize,
+					default_image: fallbackImg,
+				},
+				{
+					headers: { "X-WP-Nonce": ptam_globals.rest_nonce },
 				}
+			)
+			.then( ( response ) => {
+				const posts = response.data.posts;
+				const taxonomies = response.data.taxonomies;
+				let termList = response.data.terms || [];
 
-			} )
-			.then((response) => {
-				latestPosts = response.data.posts;
-				userTaxonomies = response.data.taxonomies;
-				termsList = response.data.terms;
-
-				// Get Terms
 				axios
-					.post(ptam_globals.rest_url + `ptam/v2/get_terms`, {
-						taxonomy: taxonomy,
-						post_type: postType,
-					}, {
-						headers: {
-							"X-WP-Nonce": ptam_globals.rest_nonce
+					.post(
+						ptam_globals.rest_url + "ptam/v2/get_terms",
+						{ taxonomy: taxonomy, post_type: postType },
+						{
+							headers: { "X-WP-Nonce": ptam_globals.rest_nonce },
 						}
-		
-					} )
-					.then((response) => {
-						if (Object.keys(response.data).length > 0) {
-							termsList.push({
-								value: 0,
-								label: __("All", "post-type-archive-mapping"),
-							});
-							jQuery.each(response.data, function (key, value) {
-								termsList.push({ value: value.term_id, label: value.name });
-							});
+					)
+					.then( ( termsRes ) => {
+						if ( Object.keys( termsRes.data ).length > 0 ) {
+							termList = [
+								{
+									value: 0,
+									label: __( "All", "post-type-archive-mapping" ),
+								},
+							];
+							jQuery.each( termsRes.data, function ( key, value ) {
+								termList.push( {
+									value: value.term_id,
+									label: value.name,
+								} );
+							} );
 						}
 
-						// Get Taxonomies
 						axios
-							.post(ptam_globals.rest_url + `ptam/v2/get_taxonomies`, {
-								post_type: postType,
-							}, {
-								headers: {
-									"X-WP-Nonce": ptam_globals.rest_nonce
+							.post(
+								ptam_globals.rest_url + "ptam/v2/get_taxonomies",
+								{ post_type: postType },
+								{
+									headers: { "X-WP-Nonce": ptam_globals.rest_nonce },
 								}
-				
-							} )
-							.then((response) => {
-								if (Object.keys(response.data).length > 0) {
-									taxonomyList.push({
+							)
+							.then( ( taxRes ) => {
+								const taxList = [];
+								if ( Object.keys( taxRes.data ).length > 0 ) {
+									taxList.push( {
 										value: "none",
-										label: __("Select a Taxonomy", "post-type-archive-mapping"),
-									});
-									jQuery.each(response.data, function (key, value) {
-										taxonomyList.push({ value: key, label: value.label });
-									});
+										label: __(
+											"Select a Taxonomy",
+											"post-type-archive-mapping"
+										),
+									} );
+									jQuery.each( taxRes.data, function ( key, value ) {
+										taxList.push( {
+											value: key,
+											label: value.label,
+										} );
+									} );
 								}
+								setLoading( false );
+								setLatestPosts( posts );
+								setTaxonomyList( taxList );
+								setTermsList( termList );
+								setUserTaxonomies( taxonomies || [] );
+								setUserTerms( [] );
+							} );
+					} );
+			} );
+	}, [ attributes ] );
 
-								// Now Set State
-								this.setState({
-									loading: false,
-									latestPosts: latestPosts,
-									taxonomyList: taxonomyList,
-									termsList: termsList,
-									userTaxonomies: userTaxonomies,
-									userTerms: userTerms,
-								});
-							});
-					});
-			});
-	}
+	useEffect( () => {
+		getLatestData( {} );
+	}, [] );
 
-	componentDidMount = () => {
-		this.get_latest_data({});
-	};
-
-	getPostHtml = () => {
-		const posts = this.state.latestPosts;
+	const getPostHtml = () => {
+		const posts = latestPosts;
 		const htmlToReactParser = new HtmlToReactParser();
 		const {
 			disableStyles,
@@ -264,7 +265,6 @@ class PTAM_Featured_Posts extends Component {
 			showFeaturedImage,
 			showReadMore,
 			showExcerpt,
-			excerptLength,
 			excerptFont,
 			excerptFontSize,
 			excerptTextColor,
@@ -275,119 +275,133 @@ class PTAM_Featured_Posts extends Component {
 			readMoreButtonBorder,
 			readMoreButtonBorderColor,
 			readMoreButtonBorderRadius,
-		} = this.props.attributes;
-		if (Object.keys(posts).length === 0) {
+		} = attributes;
+		if ( ! posts || Object.keys( posts ).length === 0 ) {
 			return (
-				<h2>{__("No posts could be found.", "post-type-archive-mapping")}</h2>
+				<h2>{ __( "No posts could be found.", "post-type-archive-mapping" ) }</h2>
 			);
 		}
 		let titleStyles = {
 			fontFamily: titleFont,
-			fontSize: titleFontSize + 'px',
+			fontSize: titleFontSize + "px",
 			color: titleColor,
 		};
 		let excerptStyles = {
 			fontFamily: excerptFont,
-			fontSize: excerptFontSize + 'px',
+			fontSize: excerptFontSize + "px",
 			color: excerptTextColor,
 		};
 		if ( disableStyles ) {
 			titleStyles = {};
 			excerptStyles = {};
 		}
-		const readMoreButtonStyles = !disableStyles
+		const readMoreButtonStyles = ! disableStyles
 			? {
 					color: readMoreButtonTextColor,
 					backgroundColor: readMoreButtonBackgroundColor,
 					borderWidth: readMoreButtonBorder + "px",
 					borderColor: readMoreButtonBorderColor,
-					borderRadius: readMoreButtonBorderRadius + 'px',
-					fontFamily: `${readMoreButtonFont}`,
+					borderRadius: readMoreButtonBorderRadius + "px",
+					fontFamily: readMoreButtonFont,
 					borderStyle: "solid",
 			  }
 			: {};
-		return Object.keys(posts).map((term, i) => (
-			<Fragment key={i}>
-				<div
-					className="ptam-featured-post-item"
-				>
+		return Object.keys( posts ).map( ( termKey, i ) => (
+			<Fragment key={ i }>
+				<div className="ptam-featured-post-item">
 					<div className="ptam-featured-post-meta">
-						<h3 className="entry-title"><a style={titleStyles} href={posts[i].link}>{posts[i].post_title}</a></h3>
-						{showMeta &&
+						<h3 className="entry-title">
+							<a style={ titleStyles } href={ posts[ i ].link }>
+								{ posts[ i ].post_title }
+							</a>
+						</h3>
+						{ showMeta && (
 							<Fragment>
 								<div className="entry-meta">
-								{showMetaAuthor &&
-									<span className="author-name"><a href={posts[i].author_info.author_link}>{posts[i].author_info.display_name}</a></span>
-								}
-								{showMetaDate &&
-									<span className="post-date">
-										<time
-											dateTime={dayjs(posts[i].post_date_gmt).format()}
-											className={"ptam-block-post-grid-date"}
-										>
-											{dayjs(posts[i].post_date_gmt).format("MMMM DD, YYYY")}
-										</time>
-									</span>
-								}
-								{showMetaComments &&
-									<span className="post-comments">
-										{posts[i].comment_count} {_n('Comment', 'Comments', posts[i].comment_count, 'post-type-archive-mapping')}
-									</span>
-								}
+									{ showMetaAuthor && (
+										<span className="author-name">
+											<a href={ posts[ i ].author_info.author_link }>
+												{ posts[ i ].author_info.display_name }
+											</a>
+										</span>
+									) }
+									{ showMetaDate && (
+										<span className="post-date">
+											<time
+												dateTime={ dayjs( posts[ i ].post_date_gmt ).format() }
+												className="ptam-block-post-grid-date"
+											>
+												{ dayjs( posts[ i ].post_date_gmt ).format( "MMMM DD, YYYY" ) }
+											</time>
+										</span>
+									) }
+									{ showMetaComments && (
+										<span className="post-comments">
+											{ posts[ i ].comment_count }{ " " }
+											{ _n(
+												"Comment",
+												"Comments",
+												posts[ i ].comment_count,
+												"post-type-archive-mapping"
+											) }
+										</span>
+									) }
 								</div>
 							</Fragment>
-						}
+						) }
 					</div>
-					{posts[i].featured_image_src && showFeaturedImage &&
+					{ posts[ i ].featured_image_src && showFeaturedImage && (
 						<Fragment>
 							<div className="ptam-featured-post-image">
-								<a href={posts[i].link}>
-									{htmlToReactParser.parse(posts[i].featured_image_src)}
+								<a href={ posts[ i ].link }>
+									{ htmlToReactParser.parse( posts[ i ].featured_image_src ) }
 								</a>
 							</div>
 						</Fragment>
-					}
-					{showExcerpt &&
-						<div className="ptam-featured-post-content" style={excerptStyles}>
-							{this.excerptParse(posts[i].post_excerpt)}
+					) }
+					{ showExcerpt && (
+						<div className="ptam-featured-post-content" style={ excerptStyles }>
+							{ excerptParse( posts[ i ].post_excerpt ) }
 						</div>
-					}
-					{showReadMore &&
+					) }
+					{ showReadMore && (
 						<div className="ptam-featured-post-button">
-							<a className="btn btn-primary" href={posts[i].link} style={readMoreButtonStyles}>{readMoreButtonText}</a>
+							<a
+								className="btn btn-primary"
+								href={ posts[ i ].link }
+								style={ readMoreButtonStyles }
+							>
+								{ readMoreButtonText }
+							</a>
 						</div>
-					}
+					) }
 				</div>
 			</Fragment>
-		));
+		) );
 	};
 
-	itemNumberRender = ( value ) => {
-		const postsToShow = value;
-		if ( this.state.itemNumberTimer ) {
-			clearTimeout(this.state.itemNumberTimer);
+	const itemNumberRender = ( value ) => {
+		if ( itemNumberTimerRef.current ) {
+			clearTimeout( itemNumberTimerRef.current );
 		}
-		this.setState( {
-			itemNumberTimer: setTimeout( () => {
-				this.get_latest_data( { postsToShow: postsToShow });
-			}, 1000 ),
-		});
+		itemNumberTimerRef.current = setTimeout( () => {
+			getLatestData( { postsToShow: value } );
+		}, 1000 );
+	};
+
+	const onExcerptLengthChange = ( value ) =>
+		setAttributes( { excerptLength: value } );
+
+	if ( attributes.preview ) {
+		return (
+			<Fragment>
+				<img src={ ptam_globals.featured_posts_block_preview } />
+			</Fragment>
+		);
 	}
-	trimWords = value => {
-		const { setAttributes } = this.props;
-		setAttributes({ excerptLength: value });
-	}
-	render() {
-		if ( this.props.attributes.preview ) {
-			return(
-				<Fragment>
-					<img src={ptam_globals.featured_posts_block_preview} />
-				</Fragment>
-			);
-		}
-		let htmlToReactParser = new HtmlToReactParser();
-		const { attributes, setAttributes } = this.props;
-		const {
+
+	const htmlToReactParser = new HtmlToReactParser();
+	const {
 			align,
 			postType,
 			imageTypeSize,
@@ -443,16 +457,9 @@ class PTAM_Featured_Posts extends Component {
 			fontOptions.push({ value: key, label: ptam_globals.fonts[key] });
 		}
 
-		// Post Types.
-		let postTypeOptions = [];
-		for (var key in ptam_globals.post_types) {
-			postTypeOptions.push({ value: key, label: ptam_globals.post_types[key] });
-		}
-
 		// Image Sizes.
 		let imageSizeOptions = [];
-		let imageSizes = this.state.imageSizes;
-		for (var key in imageSizes) {
+		for ( var key in imageSizes ) {
 			imageSizeOptions.push({ value: key, label: key });
 		}
 
@@ -519,9 +526,9 @@ class PTAM_Featured_Posts extends Component {
 
 		// Get the term label.
 		let selectedTerm = 0;
-		for ( let key in this.state.termsList ) {
-			if ( this.state.termsList[key].value == term ) {
-				selectedTerm = this.state.termsList[key].label;
+		for ( let key in termsList ) {
+			if ( termsList[key].value == term ) {
+				selectedTerm = termsList[key].label;
 				break;
 			}
 		}
@@ -560,12 +567,12 @@ class PTAM_Featured_Posts extends Component {
 						options={postTypeOptions}
 						value={postType}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								postType: value,
 								taxonomy: "none",
 								term: 0,
 							});
-							this.get_latest_data({
+							getLatestData({
 								postType: value,
 								taxonomy: "none",
 								term: 0
@@ -574,21 +581,21 @@ class PTAM_Featured_Posts extends Component {
 					/>
 					<SelectControl
 						label={__("Taxonomy", "post-type-archive-mapping")}
-						options={this.state.taxonomyList}
+						options={taxonomyList}
 						value={taxonomy}
 						onChange={(value) => {
-							this.props.setAttributes({ taxonomy: value });
-							this.get_term_list({ taxonomy: value, term: 0 });
-							this.get_latest_posts({ term: value });
+							setAttributes({ taxonomy: value });
+							getTermList({ taxonomy: value, term: 0 });
+							getLatestPosts({ term: value });
 						}}
 					/>
 					<SelectControl
 						label={__("Terms", "post-type-archive-mapping")}
-						options={this.state.termsList}
+						options={termsList}
 						value={term}
 						onChange={value => {
-							this.props.setAttributes({ term: value });
-							this.get_latest_posts({ term: value });
+							setAttributes({ term: value });
+							getLatestPosts({ term: value });
 						}}
 					/>
 					<SelectControl
@@ -596,8 +603,8 @@ class PTAM_Featured_Posts extends Component {
 						options={orderOptions}
 						value={order}
 						onChange={(value) => {
-							this.props.setAttributes({ order: value });
-							this.get_latest_posts({ order: value });
+							setAttributes({ order: value });
+							getLatestPosts({ order: value });
 						}}
 					/>
 					<SelectControl
@@ -605,16 +612,16 @@ class PTAM_Featured_Posts extends Component {
 						options={orderByOptions}
 						value={orderBy}
 						onChange={(value) => {
-							this.props.setAttributes({ orderBy: value });
-							this.get_latest_posts({ orderBy: value });
+							setAttributes({ orderBy: value });
+							getLatestPosts({ orderBy: value });
 						}}
 					/>
 					<RangeControl
 						label={__("Number of Items", "post-type-archive-mapping")}
 						value={postsToShow}
 						onChange={value => {
-							this.props.setAttributes({ postsToShow: value });
-							this.itemNumberRender( value );
+							setAttributes({ postsToShow: value });
+							itemNumberRender( value );
 						}}
 						min={1}
 						max={100}
@@ -633,14 +640,14 @@ class PTAM_Featured_Posts extends Component {
 						type="text"
 						value={containerId}
 						onChange={(value) =>
-							this.props.setAttributes({ containerId: value })
+							setAttributes({ containerId: value })
 						}
 					/>
 					<ToggleControl
 						label={__("Disable Styles", "post-type-archive-mapping")}
 						checked={disableStyles}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								disableStyles: value,
 							});
 						}}
@@ -649,7 +656,7 @@ class PTAM_Featured_Posts extends Component {
 						label={__("Show Post Meta", "post-type-archive-mapping")}
 						checked={showMeta}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								showMeta: value,
 							});
 						}}
@@ -661,7 +668,7 @@ class PTAM_Featured_Posts extends Component {
 								label={__("Show Author", "post-type-archive-mapping")}
 								checked={showMetaAuthor}
 								onChange={(value) => {
-									this.props.setAttributes({
+									setAttributes({
 										showMetaAuthor: value,
 									});
 								}}
@@ -670,7 +677,7 @@ class PTAM_Featured_Posts extends Component {
 								label={__("Show Date", "post-type-archive-mapping")}
 								checked={showMetaDate}
 								onChange={(value) => {
-									this.props.setAttributes({
+									setAttributes({
 										showMetaDate: value,
 									});
 								}}
@@ -679,7 +686,7 @@ class PTAM_Featured_Posts extends Component {
 								label={__("Show Comments", "post-type-archive-mapping")}
 								checked={showMetaComments}
 								onChange={(value) => {
-									this.props.setAttributes({
+									setAttributes({
 										showMetaComments: value,
 									});
 								}}
@@ -690,7 +697,7 @@ class PTAM_Featured_Posts extends Component {
 						label={__("Show Featured Image", "post-type-archive-mapping")}
 						checked={showFeaturedImage}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								showFeaturedImage: value,
 							});
 						}}
@@ -699,7 +706,7 @@ class PTAM_Featured_Posts extends Component {
 						label={__("Show The Excerpt", "post-type-archive-mapping")}
 						checked={showExcerpt}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								showExcerpt: value,
 							});
 						}}
@@ -708,7 +715,7 @@ class PTAM_Featured_Posts extends Component {
 						label={__("Show Read More Button", "post-type-archive-mapping")}
 						checked={showReadMore}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								showReadMore: value,
 							});
 						}}
@@ -718,7 +725,7 @@ class PTAM_Featured_Posts extends Component {
 						help={__('Not recommended if you have more than one of these blocks on the same page.', 'post-type-archive-mapping')}
 						checked={showPagination}
 						onChange={(value) => {
-							this.props.setAttributes({
+							setAttributes({
 								showPagination: value,
 							});
 						}}
@@ -733,34 +740,34 @@ class PTAM_Featured_Posts extends Component {
 						type="text"
 						value={termTitle}
 						onChange={(value) =>
-							this.props.setAttributes({ termTitle: value })
+							setAttributes({ termTitle: value })
 						}
 					/>
 					<RangeControl
 						label={__("Padding Top", "post-type-archive-mapping")}
 						value={termDisplayPaddingTop}
-						onChange={(value) => this.props.setAttributes({ termDisplayPaddingTop: value })}
+						onChange={(value) => setAttributes({ termDisplayPaddingTop: value })}
 						min={1}
 						max={100}
 					/>
 					<RangeControl
 						label={__("Padding Right", "post-type-archive-mapping")}
 						value={termDisplayPaddingRight}
-						onChange={(value) => this.props.setAttributes({ termDisplayPaddingRight: value })}
+						onChange={(value) => setAttributes({ termDisplayPaddingRight: value })}
 						min={1}
 						max={100}
 					/>
 					<RangeControl
 						label={__("Padding Bottom", "post-type-archive-mapping")}
 						value={termDisplayPaddingBottom}
-						onChange={(value) => this.props.setAttributes({ termDisplayPaddingBottom: value })}
+						onChange={(value) => setAttributes({ termDisplayPaddingBottom: value })}
 						min={1}
 						max={100}
 					/>
 					<RangeControl
 						label={__("Padding Left", "post-type-archive-mapping")}
 						value={termDisplayPaddingLeft}
-						onChange={(value) => this.props.setAttributes({ termDisplayPaddingLeft: value })}
+						onChange={(value) => setAttributes({ termDisplayPaddingLeft: value })}
 						min={1}
 						max={100}
 					/>
@@ -792,13 +799,13 @@ class PTAM_Featured_Posts extends Component {
 						options={fontOptions}
 						value={termFont}
 						onChange={(value) => {
-							this.props.setAttributes({ termFont: value });
+							setAttributes({ termFont: value });
 						}}
 					/>
 					<RangeControl
 						label={__("Font Size", "post-type-archive-mapping")}
 						value={termFontSize}
-						onChange={(value) => this.props.setAttributes({ termFontSize: value })}
+						onChange={(value) => setAttributes({ termFontSize: value })}
 						min={10}
 						max={60}
 					/>
@@ -835,13 +842,13 @@ class PTAM_Featured_Posts extends Component {
 						options={fontOptions}
 						value={titleFont}
 						onChange={(value) => {
-							this.props.setAttributes({ titleFont: value });
+							setAttributes({ titleFont: value });
 						}}
 					/>
 					<RangeControl
 						label={__("Title Font Size", "post-type-archive-mapping")}
 						value={titleFontSize}
-						onChange={(value) => this.props.setAttributes({ titleFontSize: value })}
+						onChange={(value) => setAttributes({ titleFontSize: value })}
 						min={10}
 						max={60}
 					/>
@@ -854,8 +861,8 @@ class PTAM_Featured_Posts extends Component {
 						<Fragment>
 							<MediaUpload
 								onSelect={imageObject => {
-									this.props.setAttributes({ fallbackImg: imageObject });
-									this.get_latest_posts({ fallbackImg: imageObject });
+									setAttributes({ fallbackImg: imageObject });
+									getLatestPosts({ fallbackImg: imageObject });
 								}}
 								type="image"
 								value={fallbackImg.url}
@@ -887,8 +894,8 @@ class PTAM_Featured_Posts extends Component {
 													<button
 														className="ptam-media-alt-reset components-button is-button is-secondary"
 														onClick={event => {
-															this.props.setAttributes({ fallbackImg: "" });
-															this.get_latest_posts({ fallbackImg: 0 });
+															setAttributes({ fallbackImg: "" });
+															getLatestPosts({ fallbackImg: 0 });
 														}}
 													>
 														{__("Reset Image", "post-type-archive-mapping")}
@@ -907,8 +914,8 @@ class PTAM_Featured_Posts extends Component {
 								options={imageSizeOptions}
 								value={imageTypeSize}
 								onChange={value => {
-									this.props.setAttributes({ imageTypeSize: value });
-									this.get_latest_posts({ imageTypeSize: value });
+									setAttributes({ imageTypeSize: value });
+									getLatestPosts({ imageTypeSize: value });
 								}}
 							/>
 						</Fragment>
@@ -926,7 +933,7 @@ class PTAM_Featured_Posts extends Component {
 							)}
 							type="number"
 							value={excerptLength}
-							onChange={value => this.trimWords(value)}
+							onChange={ ( value ) => onExcerptLengthChange( value ) }
 						/>
 						<PanelColorSettings
 							title={__("Excerpt Colors", "post-type-archive-mapping")}
@@ -946,13 +953,13 @@ class PTAM_Featured_Posts extends Component {
 							options={fontOptions}
 							value={excerptFont}
 							onChange={(value) => {
-								this.props.setAttributes({ excerptFont: value });
+								setAttributes({ excerptFont: value });
 							}}
 						/>
 						<RangeControl
 							label={__("Excerpt Font Size", "post-type-archive-mapping")}
 							value={excerptFontSize}
-							onChange={(value) => this.props.setAttributes({ excerptFontSize: value })}
+							onChange={(value) => setAttributes({ excerptFontSize: value })}
 							min={10}
 							max={60}
 						/>
@@ -969,7 +976,7 @@ class PTAM_Featured_Posts extends Component {
 								type="text"
 								value={readMoreButtonText}
 								onChange={(value) =>
-									this.props.setAttributes({ readMoreButtonText: value })
+									setAttributes({ readMoreButtonText: value })
 								}
 							/>
 							<SelectControl
@@ -977,7 +984,7 @@ class PTAM_Featured_Posts extends Component {
 								options={fontOptions}
 								value={readMoreButtonFont}
 								onChange={(value) => {
-									this.props.setAttributes({ readMoreButtonFont: value });
+									setAttributes({ readMoreButtonFont: value });
 								}}
 							/>
 							<PanelColorSettings
@@ -1051,7 +1058,7 @@ class PTAM_Featured_Posts extends Component {
 
 			</InspectorControls>
 		);
-		if (this.state.loading) {
+		if (loading) {
 			return (
 				<Fragment>
 					{inspectorControls}
@@ -1077,7 +1084,7 @@ class PTAM_Featured_Posts extends Component {
 				</Fragment>
 			)
 		}
-		if (! this.state.loading) {
+		if ( ! loading ) {
 			return (
 				<Fragment>
 					{inspectorControls}
@@ -1096,14 +1103,13 @@ class PTAM_Featured_Posts extends Component {
 							}}
 						></style>
 					)}
-					<div className="ptam-fp-wrapper" id={containerId}>
+					<div { ...blockProps } id={ containerId }>
 						<h4 className="ptam-fp-term" style={termContainerStyles}><span style={termButtonStyles}>{selectedTerm}</span></h4>
-						{this.getPostHtml()}
+						{ getPostHtml() }
 					</div>
 				</Fragment>
 			);
-		}
 	}
 }
 
-export default PTAM_Featured_Posts;
+export default PTAM_Featured_PostsEdit;
