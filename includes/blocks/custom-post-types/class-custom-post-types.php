@@ -432,7 +432,7 @@ class Custom_Post_Types {
 							'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
 							esc_url( get_permalink( $post_id ) ),
 							$this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID ),
-							'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['imageAlignment']}" : ''
+							'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['imageAlignment']}'" : ''
 						);
 					} else {
 						$list_items_markup .= sprintf(
