@@ -2,9 +2,9 @@
 Contributors: ronalfy, chrislogan, paaljoachim
 Tags: map pages, archives, post type block, 404 page, category grid
 Requires at least: 6.5
-Requires PHP: 5.6
-Tested up to: 6.9
-Stable tag: 5.5.0
+Requires PHP: 7.2
+Tested up to: 7.0
+Stable tag: 5.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://github.com/MediaRon/post-type-archive-mapping
@@ -121,6 +121,10 @@ Yes, just post in the support forums here and I'll do my best to address your is
 5. Term archive option.
 
 == Changelog ==
+
+= 5.6.0 =
+* Released 2026-03-06
+* Security Fix: Finalizing resolving XSS issue with image alignment as reported by Patchstack.
 
 = 5.5.0 =
 * Released 2026-02-19
@@ -376,5 +380,5 @@ Yes, just post in the support forums here and I'll do my best to address your is
 
 == Upgrade Notice ==
 
-= 5.5.0 =
-Resolving XSS vulnerability with image alignment. Fixing PHP warnings. Blocks are now block.json v3 compatible.
+= 5.6.0 =
+Finalizing resolving XSS issue with image alignment as reported by Patchstack.

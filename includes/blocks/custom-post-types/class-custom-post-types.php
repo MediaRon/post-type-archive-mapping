@@ -66,7 +66,7 @@ class Custom_Post_Types {
 			'center',
 			'right',
 		);
-		$image_alignment          = Functions::sanitize_attribute( $attributes, 'imageAlignment', 'text' );
+		$image_alignment          = Functions::sanitize_attribute( $attributes, 'imageAlignment', 'attr' );
 		if ( ! in_array( $image_alignment, $image_alignments_options, true ) ) {
 			$image_alignment = 'left';
 		}
@@ -80,7 +80,7 @@ class Custom_Post_Types {
 						'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
 						esc_url( get_permalink( $post_id ) ),
 						get_avatar( $post_author, $attributes['avatarSize'] ),
-						'grid' === $attributes['postLayout'] ? "style='text-align: {$image_alignment}'" : ''
+						'grid' === $attributes['postLayout'] ? "style='text-align: " . esc_attr( $image_alignment ) . "'" : ''
 					);
 				} else {
 					$list_item_markup .= sprintf(
@@ -94,7 +94,7 @@ class Custom_Post_Types {
 						'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
 						esc_url( get_permalink( $post_id ) ),
 						wp_get_attachment_image( $post_thumb_id, $post_thumb_size ),
-						'grid' === $attributes['postLayout'] ? "style='text-align: {$image_alignment}'" : ''
+						'grid' === $attributes['postLayout'] ? "style='text-align: " . esc_attr( $image_alignment ) . "'" : ''
 					);
 			} else {
 				$list_item_markup .= sprintf(
@@ -441,7 +441,7 @@ class Custom_Post_Types {
 							'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
 							esc_url( get_permalink( $post_id ) ),
 							$this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID ),
-							'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['imageAlignment']}'" : ''
+							'grid' === $attributes['postLayout'] ? "style='text-align: " . esc_attr( $attributes['imageAlignment'] ) . "'" : ''
 						);
 					} else {
 						$list_items_markup .= sprintf(

@@ -50,6 +50,8 @@ class Functions {
 	public static function sanitize_attribute( $attributes, $attribute, $type = 'text' ) {
 		if ( isset( $attributes[ $attribute ] ) ) {
 			switch ( $type ) {
+				case 'attr':
+					return esc_attr( $attributes[ $attribute ] );
 				case 'text':
 					return sanitize_text_field( $attributes[ $attribute ] );
 				case 'bool':
