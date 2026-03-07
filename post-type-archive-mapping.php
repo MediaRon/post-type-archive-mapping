@@ -249,7 +249,7 @@ class PostTypeArchiveMapping {
 		}
 
 		// trigger this the first time to get the current page.
-		if ( is_null( $this->paged ) ) {
+		if ( is_null( $this->paged ) && $query->get( 'post_type' ) !== 'wp_global_styles' ) {
 			$this->paged = get_query_var( 'paged' );
 		}
 		if ( is_array( $post_types ) && ! empty( $post_types ) ) {
