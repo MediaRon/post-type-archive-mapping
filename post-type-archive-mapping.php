@@ -51,6 +51,51 @@ class PostTypeArchiveMapping {
 	private $paged_reset = false;
 
 	/**
+	 * @var PTAM\Includes\Enqueue
+	 */
+	public $enqueue;
+
+	/**
+	 * @var PTAM\Includes\Rest|null
+	 */
+	public $rest = null;
+
+	/**
+	 * @var PTAM\Includes\Blocks\Custom_Post_Types\Custom_Post_Types|null
+	 */
+	public $cpt_block_one = null;
+
+	/**
+	 * @var PTAM\Includes\Blocks\Term_Grid\Terms|null
+	 */
+	public $term_grid = null;
+
+	/**
+	 * @var PTAM\Includes\Blocks\Featured_Posts\Posts|null
+	 */
+	public $featured_posts = null;
+
+	/**
+	 * @var PTAM\Includes\Admin\Gutenberg|null
+	 */
+	public $gutenberg = null;
+
+	/**
+	 * @var PTAM\Includes\Admin\Page_Columns|null
+	 */
+	public $page_columns = null;
+
+	/**
+	 * @var PTAM\Includes\Yoast
+	 */
+	public $yoast;
+
+	/**
+	 * @var PTAM\Includes\Admin\Admin_Settings
+	 */
+	public $admin_settings;
+
+	/**
 	 * Return an instance of the class
 	 *
 	 * Return an instance of the PostTypeArchiveMapping Class.
