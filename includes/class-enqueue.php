@@ -104,14 +104,11 @@ class Enqueue {
 		}
 
 		$wpml_languages = array();
-		if ( function_exists( 'icl_get_languages' ) ) {
-			$languages = icl_get_languages();
-			foreach ( $languages as $language ) {
-				$wpml_languages[] = array(
-					'value' => $language['code'],
-					'label' => $language['native_name'],
-				);
-			}
+		foreach ( apply_filters( 'wpml_active_languages', [] ) as $language ) {
+			$wpml_languages[] = array(
+				'value' => $language['language_code'],
+				'label' => $language['native_name'],
+			);
 		}
 
 		// Pass in i18n variables.
